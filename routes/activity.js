@@ -98,6 +98,23 @@ router.post('/tap-result', (req, res) => {
   res.json({ ok: true });
 });
 
+router.get('/my-interval-stats', (req, res) => {
+  res.json(db.prepare(`
+    SELECT interval_name,
+      COUNT(*) total,
+      COALESCE(SUM(is_correct),0) correct,
+      ROUND(100.0 * COALESCE(SUM(is_correct),0) / COUNT(*), 1) accuracy_pct
+    FROM interval_attempts WHERE user_id=?
+    GROUP BY interval_name
+    ORDER BY CASE interval_name
+      WHEN 'Unísono'   THEN 0 WHEN '2ª menor' THEN 1 WHEN '2ª mayor' THEN 2
+      WHEN '3ª menor'  THEN 3 WHEN '3ª mayor' THEN 4 WHEN '4ª justa' THEN 5
+      WHEN 'Tritono'   THEN 6 WHEN '5ª justa' THEN 7 WHEN '6ª menor' THEN 8
+      WHEN '6ª mayor'  THEN 9 WHEN '7ª menor' THEN 10 WHEN '7ª mayor' THEN 11
+      WHEN 'Octava'    THEN 12 ELSE 99 END
+  `).all(req.user.id));
+});
+
 router.post('/pitch-attempt', (req, res) => {
   const { tsid, mode, noteTarget, noteDetected, deviationCents, stabilitySecs } = req.body ?? {};
   if (!mode || !['libre', 'reto'].includes(mode))

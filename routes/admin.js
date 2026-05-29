@@ -112,6 +112,19 @@ router.post('/students', (req, res) => {
   res.json({ id: lastInsertRowid, username: username.trim(), fullName: fullName.trim() });
 });
 
+router.get('/xp-ranking', (_req, res) => {
+  res.json(db.prepare(`
+    SELECT u.id, u.full_name, u.username,
+           COALESCE(x.total_xp, 0) total_xp,
+           COALESCE(x.level, 'Aprendiz') level
+    FROM users u
+    LEFT JOIN user_xp x ON x.user_id = u.id
+    WHERE u.role = 'student'
+    ORDER BY total_xp DESC
+    LIMIT 20
+  `).all());
+});
+
 router.get('/interval-accuracy', (_req, res) => {
   res.json(db.prepare(`
     SELECT interval_name,

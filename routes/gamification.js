@@ -121,15 +121,34 @@ function getStreak(userId) {
   return streak;
 }
 
+const CHALLENGE_POOL = [
+  { tool: 'intervaltrainer', description: 'Identifica correctamente 5 intervalos en el Entrenador', target: 5,  xp: 50 },
+  { tool: 'intervaltrainer', description: 'Acierta 8 intervalos seguidos en el Entrenador',          target: 8,  xp: 70 },
+  { tool: 'intervaltrainer', description: 'Responde correctamente 10 intervalos hoy',                target: 10, xp: 80 },
+  { tool: 'studio',          description: 'Completa una sesión de Lectura de Ritmo hoy',             target: 1,  xp: 40 },
+  { tool: 'studio',          description: 'Practica Lectura de Ritmo por al menos 5 minutos',        target: 1,  xp: 45 },
+  { tool: 'academia',        description: 'Practica Lectura de Notas hoy',                           target: 1,  xp: 40 },
+  { tool: 'academia',        description: 'Completa una sesión de Lectura de Notas de 10 minutos',   target: 1,  xp: 55 },
+];
+
+// Day resets at 8am local time
+function getLocalDate() {
+  const now = new Date();
+  if (now.getHours() < 8) now.setDate(now.getDate() - 1);
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 function getTodayChallenge() {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = getLocalDate();
   let ch = db.prepare('SELECT * FROM daily_challenge WHERE date=?').get(today);
   if (!ch) {
-    const config = JSON.stringify({
-      description: 'Identifica correctamente 5 intervalos en el Entrenador',
-      target: 5,
-    });
-    db.prepare('INSERT OR IGNORE INTO daily_challenge (date,tool,config_json,xp_reward) VALUES (?,?,?,?)').run(today, 'intervaltrainer', config, 12);
+    const seed = parseInt(today.replace(/-/g, ''), 10);
+    const pick = CHALLENGE_POOL[seed % CHALLENGE_POOL.length];
+    db.prepare('INSERT OR IGNORE INTO daily_challenge (date,tool,config_json,xp_reward) VALUES (?,?,?,?)')
+      .run(today, pick.tool, JSON.stringify({ description: pick.description, target: pick.target }), pick.xp);
     ch = db.prepare('SELECT * FROM daily_challenge WHERE date=?').get(today);
   }
   return ch;

@@ -1,0 +1,34 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isTeacher() {
+      return request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher';
+    }
+
+    match /users/{userId} {
+      // User reads their own profile; teacher reads any profile
+      allow read:  if request.auth != null && (request.auth.uid == userId || isTeacher());
+      // Only the user writes their own profile (teacher creation handled via Auth SDK)
+      allow write: if request.auth != null && request.auth.uid == userId;
+
+      match /sessions/{docId} {
+        allow read:  if request.auth != null && (request.auth.uid == userId || isTeacher());
+        allow write: if request.auth != null && request.auth.uid == userId;
+      }
+      match /intervalAttempts/{docId} {
+        allow read:  if request.auth != null && (request.auth.uid == userId || isTeacher());
+        allow write: if request.auth != null && request.auth.uid == userId;
+      }
+      match /achievements/{docId} {
+        allow read:  if request.auth != null && (request.auth.uid == userId || isTeacher());
+        allow write: if request.auth != null && request.auth.uid == userId;
+      }
+      match /challengeCompletions/{docId} {
+        allow read:  if request.auth != null && (request.auth.uid == userId || isTeacher());
+        allow write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+  }
+}

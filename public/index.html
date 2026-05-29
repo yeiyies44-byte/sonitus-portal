@@ -402,7 +402,6 @@
     <img src="/logo.jpeg" alt="" style="position:absolute;width:120px;top:28%;right:-22px;transform:rotate(10deg);opacity:.07;mix-blend-mode:multiply;pointer-events:none;"/>
     <img src="/logo.jpeg" alt="" style="position:absolute;width:120px;bottom:-12px;left:-8px;transform:rotate(8deg);opacity:.07;mix-blend-mode:multiply;pointer-events:none;"/>
     <img src="/logo.jpeg" alt="" style="position:absolute;width:120px;bottom:-4px;right:-12px;transform:rotate(-14deg);opacity:.07;mix-blend-mode:multiply;pointer-events:none;"/>
-    <img src="/logo.jpeg" alt="" style="position:absolute;width:200px;top:50%;left:50%;transform:translate(-50%,-50%);opacity:.07;mix-blend-mode:multiply;pointer-events:none;"/>
   </div>
   <div id="toast"></div>
   <div id="app"></div>
@@ -429,11 +428,11 @@
       };
     })();
   </script>
-  <script src="/js/app.js"></script>
+  <script type="module" src="js/app.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
+        navigator.serviceWorker.register('sw.js')
           .catch((err) => console.warn('SW registration failed:', err));
       });
     }
