@@ -1,0 +1,6 @@
+{"type":"server-started","port":57582,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:57582","screen_dir":"/Users/yeiyies/sonitus-portal/.superpowers/brainstorm/36523-1780010517/content","state_dir":"/Users/yeiyies/sonitus-portal/.superpowers/brainstorm/36523-1780010517/state"}
+{"type":"screen-added","file":"/Users/yeiyies/sonitus-portal/.superpowers/brainstorm/36523-1780010517/content/layout-options.html"}
+{"type":"screen-added","file":"/Users/yeiyies/sonitus-portal/.superpowers/brainstorm/36523-1780010517/content/character-options.html"}
+{"type":"screen-added","file":"/Users/yeiyies/sonitus-portal/.superpowers/brainstorm/36523-1780010517/content/waiting-1.html"}
+{"type":"screen-added","file":"/Users/yeiyies/sonitus-portal/.superpowers/brainstorm/36523-1780010517/content/full-design.html"}
+{"type":"server-stopped","reason":"idle timeout"}

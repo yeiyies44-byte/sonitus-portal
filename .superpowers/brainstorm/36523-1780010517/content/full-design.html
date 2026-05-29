@@ -1,0 +1,172 @@
+<h2>Diseño Completo — Maestro Búho</h2>
+<p class="subtitle">Así quedaría la sección inline en el dashboard. Revisa el layout y el personaje.</p>
+
+<div class="mockup" style="max-width:680px;margin:0 auto;">
+  <div class="mockup-header">Dashboard — Vista completa</div>
+  <div class="mockup-body" style="background:#ecfdf5;padding:16px;font-family:system-ui,sans-serif;">
+
+    <!-- Header del portal -->
+    <div style="background:linear-gradient(135deg,#059669,#10b981);border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:28px;height:28px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;">♪</div>
+        <div><div style="color:#fff;font-weight:700;font-size:13px;">Sonitus Portal</div><div style="color:rgba(255,255,255,.7);font-size:10px;">Herramientas Educativas</div></div>
+      </div>
+      <div style="color:rgba(255,255,255,.8);font-size:11px;background:rgba(255,255,255,.15);padding:4px 10px;border-radius:20px;">Yei ✕</div>
+    </div>
+
+    <!-- Tool grid (mini) -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+      <div style="background:#fff;border-radius:8px;padding:10px;border:1px solid #e5e7eb;">
+        <div style="font-size:18px;margin-bottom:4px;">🥁</div>
+        <div style="font-size:10px;font-weight:700;color:#374151;">Lectura de Ritmo</div>
+        <div style="font-size:9px;color:#9ca3af;margin-top:2px;">21 sesiones</div>
+      </div>
+      <div style="background:#fff;border-radius:8px;padding:10px;border:1px solid #e5e7eb;">
+        <div style="font-size:18px;margin-bottom:4px;">🎼</div>
+        <div style="font-size:10px;font-weight:700;color:#374151;">Lectura de Notas</div>
+        <div style="font-size:9px;color:#9ca3af;margin-top:2px;">17 sesiones</div>
+      </div>
+      <div style="background:#fff;border-radius:8px;padding:10px;border:1px solid #e5e7eb;">
+        <div style="font-size:18px;margin-bottom:4px;">🎧</div>
+        <div style="font-size:10px;font-weight:700;color:#374151;">Intervalos</div>
+        <div style="font-size:9px;color:#9ca3af;margin-top:2px;">12 sesiones</div>
+      </div>
+      <div style="background:#fff;border-radius:8px;padding:10px;border:1px solid #e5e7eb;">
+        <div style="font-size:18px;margin-bottom:4px;">🎤</div>
+        <div style="font-size:10px;font-weight:700;color:#374151;">Entren. Vocal</div>
+        <div style="font-size:9px;color:#9ca3af;margin-top:2px;">Nuevo</div>
+      </div>
+    </div>
+
+    <!-- ══ SECCIÓN DEL BÚHO ══ -->
+    <div style="background:#fff;border-radius:12px;border:1px solid #ddd6fe;box-shadow:0 2px 12px rgba(124,58,237,.1);overflow:hidden;">
+
+      <!-- Header de la sección -->
+      <div style="background:linear-gradient(135deg,#4c1d95,#7c3aed,#059669);padding:10px 14px;display:flex;align-items:center;gap:8px;">
+        <div style="width:8px;height:8px;background:#4ade80;border-radius:50%;box-shadow:0 0 6px #4ade80;"></div>
+        <span style="color:#fff;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;">Maestro Búho · Historia de la Música</span>
+      </div>
+
+      <div style="display:flex;gap:0;min-height:160px;">
+
+        <!-- Búho robótico SVG -->
+        <div style="width:110px;flex-shrink:0;background:linear-gradient(180deg,#f5f3ff,#ede9fe);display:flex;align-items:center;justify-content:center;border-right:1px solid #e9d5ff;padding:12px;">
+          <style>
+            @keyframes owl-bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+            @keyframes eye-glow { 0%,100%{opacity:1} 50%{opacity:.5} }
+            @keyframes antenna-blink { 0%,80%,100%{fill:#4ade80} 40%{fill:#7c3aed} }
+            .owl-body { animation: owl-bob 3s ease-in-out infinite; }
+            .owl-eye { animation: eye-glow 2s ease-in-out infinite; }
+            .ant-tip { animation: antenna-blink 1.5s ease-in-out infinite; }
+          </style>
+          <svg class="owl-body" width="72" height="96" viewBox="0 0 72 96">
+            <!-- Antena -->
+            <line x1="36" y1="6" x2="36" y2="18" stroke="#6d28d9" stroke-width="2"/>
+            <circle class="ant-tip" cx="36" cy="5" r="4" fill="#4ade80"/>
+
+            <!-- Cuerpo metálico -->
+            <ellipse cx="36" cy="72" rx="24" ry="22" fill="url(#metal1)"/>
+            <defs>
+              <linearGradient id="metal1" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#c4b5fd"/>
+                <stop offset="100%" stop-color="#7c3aed"/>
+              </linearGradient>
+              <linearGradient id="metal2" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#ddd6fe"/>
+                <stop offset="100%" stop-color="#a78bfa"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Alas -->
+            <ellipse cx="12" cy="70" rx="10" ry="16" fill="#6d28d9" transform="rotate(-20 12 70)"/>
+            <ellipse cx="60" cy="70" rx="10" ry="16" fill="#6d28d9" transform="rotate(20 60 70)"/>
+
+            <!-- Detalles circuito en cuerpo -->
+            <line x1="26" y1="68" x2="46" y2="68" stroke="#a78bfa" stroke-width="1" opacity=".6"/>
+            <line x1="28" y1="75" x2="44" y2="75" stroke="#a78bfa" stroke-width="1" opacity=".6"/>
+            <circle cx="30" cy="68" r="2" fill="#4ade80" opacity=".8"/>
+            <circle cx="42" cy="75" r="2" fill="#4ade80" opacity=".8"/>
+
+            <!-- Cabeza -->
+            <circle cx="36" cy="38" r="22" fill="url(#metal2)"/>
+
+            <!-- Orejas/plumas robóticas -->
+            <polygon points="20,20 14,6 26,17" fill="#6d28d9"/>
+            <polygon points="52,20 58,6 46,17" fill="#6d28d9"/>
+            <!-- Líneas metálicas en orejas -->
+            <line x1="19" y1="18" x2="15" y2="9" stroke="#a78bfa" stroke-width="1"/>
+            <line x1="53" y1="18" x2="57" y2="9" stroke="#a78bfa" stroke-width="1"/>
+
+            <!-- Ojos LED -->
+            <circle cx="28" cy="36" r="9" fill="#1e1b4b"/>
+            <circle cx="44" cy="36" r="9" fill="#1e1b4b"/>
+            <circle class="owl-eye" cx="28" cy="36" r="6" fill="#4ade80" opacity=".9"/>
+            <circle class="owl-eye" cx="44" cy="36" r="6" fill="#4ade80" opacity=".9" style="animation-delay:.3s"/>
+            <circle cx="29" cy="34" r="2.5" fill="white" opacity=".6"/>
+            <circle cx="45" cy="34" r="2.5" fill="white" opacity=".6"/>
+
+            <!-- Pico metálico -->
+            <polygon points="36,44 30,52 42,52" fill="#a78bfa"/>
+            <line x1="30" y1="52" x2="42" y2="52" stroke="#7c3aed" stroke-width="1.5"/>
+
+            <!-- Birrete con chip -->
+            <rect x="20" y="17" width="32" height="5" rx="2" fill="#1e1b4b"/>
+            <rect x="32" y="11" width="8" height="8" rx="1" fill="#1e1b4b"/>
+            <rect x="33" y="12" width="6" height="6" rx="0" fill="#312e81" opacity=".5"/>
+            <!-- Chip en birrete -->
+            <line x1="35" y1="12" x2="35" y2="18" stroke="#4ade80" stroke-width=".8"/>
+            <line x1="37" y1="12" x2="37" y2="18" stroke="#4ade80" stroke-width=".8"/>
+
+            <!-- Patitas -->
+            <line x1="28" y1="92" x2="24" y2="96" stroke="#6d28d9" stroke-width="3" stroke-linecap="round"/>
+            <line x1="44" y1="92" x2="48" y2="96" stroke="#6d28d9" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- Panel de chat -->
+        <div style="flex:1;display:flex;flex-direction:column;padding:12px;">
+
+          <!-- Nombre y estado -->
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+            <span style="font-size:13px;font-weight:700;color:#4c1d95;">Maestro Búho</span>
+            <span style="font-size:10px;background:#f0fdf4;color:#059669;border:1px solid #a7f3d0;border-radius:20px;padding:1px 8px;">● En línea</span>
+          </div>
+
+          <!-- Historial de chat -->
+          <div style="flex:1;background:#f9fafb;border-radius:8px;padding:8px;margin-bottom:8px;border:1px solid #e5e7eb;min-height:60px;font-size:11px;">
+            <!-- Burbuja del búho -->
+            <div style="display:flex;gap:6px;margin-bottom:6px;">
+              <div style="width:20px;height:20px;background:linear-gradient(135deg,#6d28d9,#059669);border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:white;">🦉</div>
+              <div style="background:#fff;border-radius:6px 6px 6px 0;padding:5px 8px;border:1px solid #e5e7eb;color:#374151;max-width:200px;">¡Hola! ¿Sobre qué período musical quieres aprender hoy? 🎵</div>
+            </div>
+            <!-- Burbuja del usuario -->
+            <div style="display:flex;justify-content:flex-end;gap:6px;">
+              <div style="background:#7c3aed;border-radius:6px 6px 0 6px;padding:5px 8px;color:white;max-width:200px;">¿Quién inventó la ópera?</div>
+            </div>
+          </div>
+
+          <!-- Input -->
+          <div style="display:flex;gap:6px;">
+            <input style="flex:1;border:1.5px solid #ddd6fe;border-radius:8px;padding:6px 10px;font-size:11px;color:#374151;background:#fff;outline:none;" placeholder="Pregunta algo de música..." value="" readonly/>
+            <button style="background:linear-gradient(135deg,#7c3aed,#059669);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;">→</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <!-- ══ FIN BÚHO ══ -->
+
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:20px;font-size:12px;">¿Se ve bien así? Arriba puedes ver cómo quedaría en el dashboard real. El búho tiene ojos LED verdes parpadeantes, antena con luz, cuerpo metálico con circuitos y rebota suavemente.</p>
+<div style="display:flex;gap:10px;justify-content:center;margin-top:12px;">
+  <div class="option" data-choice="approve" onclick="toggleSelect(this)" style="max-width:180px;">
+    <div class="letter">✓</div>
+    <div class="content"><h3>Aprobado</h3><p>Así quiero el diseño</p></div>
+  </div>
+  <div class="option" data-choice="adjust" onclick="toggleSelect(this)" style="max-width:180px;">
+    <div class="letter">✎</div>
+    <div class="content"><h3>Ajustar algo</h3><p>Tengo cambios</p></div>
+  </div>
+</div>

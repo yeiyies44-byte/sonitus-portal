@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sonitus · Entrenamiento Vocal</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --g:  #10b981; --gd: #059669; --gl: #ecfdf5; --gb: #a7f3d0;
+      --p:  #7c3aed; --pd: #6d28d9; --pl: #f5f3ff; --pb: #ddd6fe;
+      --red:#ef4444; --red-bg:#fef2f2; --red-b:#fecaca;
+      --g100:#f3f4f6; --g200:#e5e7eb; --g300:#d1d5db;
+      --g400:#9ca3af; --g500:#6b7280; --g700:#374151; --g900:#111827;
+      --r-sm:8px; --r-md:12px; --r-lg:16px;
+      --sh-sm:0 1px 3px rgba(0,0,0,.08); --sh-md:0 4px 16px rgba(0,0,0,.1);
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    }
+    body {
+      background: linear-gradient(135deg,#f5f3ff 0%,#faf5ff 50%,#ecfdf5 100%);
+      min-height:100vh; color:var(--g900); line-height:1.5;
+      display:flex; flex-direction:column;
+    }
+
+    @keyframes fadeIn  { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+    @keyframes bounce  { 0%,100%{transform:translateY(0)} 40%{transform:translateY(-8px)} }
+    @keyframes shake   { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+    @keyframes pop     { 0%{transform:scale(.7);opacity:0} 60%{transform:scale(1.12)} 100%{transform:scale(1);opacity:1} }
+    @keyframes spin    { to{transform:rotate(360deg)} }
+    @keyframes ring    { 0%{box-shadow:0 0 0 0 rgba(124,58,237,.5)} 70%{box-shadow:0 0 0 16px rgba(124,58,237,0)} 100%{box-shadow:0 0 0 0 rgba(124,58,237,0)} }
+
+    /* ── Hero ── */
+    .hero {
+      flex:1; display:flex; flex-direction:column; align-items:center;
+      justify-content:center; text-align:center; padding:40px 20px;
+    }
+    .hero-label {
+      font-size:11px; text-transform:uppercase; letter-spacing:.18em;
+      color:var(--p); font-weight:700; margin-bottom:18px;
+    }
+    .hero h1 {
+      font-size:clamp(2.6rem,8vw,4.5rem); font-weight:800; color:var(--pd);
+      letter-spacing:-.025em; line-height:1.05; margin-bottom:16px;
+    }
+    .hero p {
+      font-size:clamp(.975rem,2.5vw,1.2rem); color:#5b21b6;
+      max-width:36rem; margin:0 auto 34px; line-height:1.65;
+    }
+
+    /* ── Buttons ── */
+    .btn-hero {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:15px 36px; background:var(--p); color:#fff;
+      font-size:1rem; font-weight:700; border:none; border-radius:12px;
+      cursor:pointer; font-family:inherit; min-height:52px;
+      box-shadow:0 10px 25px -5px rgba(124,58,237,.4);
+      transition:background .15s,transform .15s;
+    }
+    .btn-hero:hover  { background:var(--pd); transform:translateY(-2px); }
+    .btn-hero:active { transform:scale(.96); }
+    .btn-primary {
+      display:inline-flex; align-items:center; gap:8px;
+      background:var(--p); color:#fff; border:none; cursor:pointer;
+      padding:12px 28px; border-radius:var(--r-sm); font-size:.9375rem; font-weight:700;
+      font-family:inherit; transition:all .2s; box-shadow:0 3px 12px rgba(124,58,237,.3);
+    }
+    .btn-primary:hover  { background:var(--pd); transform:translateY(-1px); }
+    .btn-primary.g      { background:var(--g);  box-shadow:0 3px 12px rgba(16,185,129,.3); }
+    .btn-primary.g:hover{ background:var(--gd); }
+    .btn-secondary {
+      display:inline-flex; align-items:center; gap:6px;
+      background:#fff; color:var(--g700); border:2px solid var(--g300); cursor:pointer;
+      padding:10px 20px; border-radius:var(--r-sm); font-size:.875rem; font-weight:600;
+      font-family:inherit; transition:all .2s;
+    }
+    .btn-secondary:hover { background:var(--g100); border-color:var(--g400); }
+    .btn-back {
+      background:none; border:1px solid var(--g300); border-radius:var(--r-sm);
+      color:var(--g500); padding:6px 14px; font-size:.8125rem; font-weight:600;
+      cursor:pointer; font-family:inherit; transition:all .15s;
+    }
+    .btn-back:hover { background:var(--g100); }
+
+    /* ── Select screens ── */
+    .sel-screen {
+      flex:1; display:flex; flex-direction:column; align-items:center;
+      justify-content:center; padding:28px 16px; gap:18px; text-align:center;
+    }
+    .sel-title { font-size:clamp(1.5rem,5vw,2rem); font-weight:800; color:var(--g900); }
+    .sel-sub   { color:var(--g500); font-size:.9375rem; max-width:400px; }
+    .level-grid { display:flex; flex-direction:column; gap:11px; width:100%; max-width:400px; }
+    .level-card {
+      background:#fff; border-radius:var(--r-md); padding:16px 18px;
+      border:2px solid var(--g200); cursor:pointer; transition:all .2s;
+      display:flex; align-items:center; gap:14px; box-shadow:var(--sh-sm); text-align:left;
+    }
+    .level-card:hover { border-color:var(--p); transform:translateX(4px); box-shadow:0 4px 16px rgba(124,58,237,.15); }
+    .lc-ico  { font-size:2rem; flex-shrink:0; }
+    .lc-name { font-size:.9375rem; font-weight:700; color:var(--g900); }
+    .lc-desc { font-size:.8125rem; color:var(--g500); margin-top:2px; }
+    .lc-tags { display:flex; flex-wrap:wrap; gap:4px; margin-top:6px; }
+    .iv-tag  {
+      font-size:.6875rem; background:var(--pl); color:var(--pd);
+      border:1px solid var(--pb); border-radius:100px; padding:1px 7px; font-weight:600;
+    }
+
+    /* ── Exercise ── */
+    main {
+      flex:1; display:flex; flex-direction:column; align-items:center;
+      padding:14px 16px; gap:12px; max-width:520px; margin:0 auto; width:100%;
+    }
+    .score-bar { display:flex; align-items:center; justify-content:space-between; width:100%; }
+    .score-badge {
+      display:inline-flex; align-items:center; gap:6px;
+      background:var(--pl); color:var(--pd); border:1px solid var(--pb);
+      border-radius:100px; padding:4px 12px; font-size:.875rem; font-weight:700;
+    }
+    .q-counter { font-size:.875rem; color:var(--g500); font-weight:600; }
+    .prog-wrap { width:100%; height:4px; background:var(--g200); border-radius:2px; }
+    .prog-bar  { height:100%; background:linear-gradient(to right,var(--p),var(--g)); border-radius:2px; transition:width .4s ease; }
+
+    .q-card {
+      background:#fff; border-radius:var(--r-lg); padding:18px 16px;
+      box-shadow:var(--sh-md); width:100%; border:1px solid var(--pb);
+      animation:fadeIn .3s ease; display:flex; flex-direction:column; align-items:center; gap:13px;
+    }
+    .iv-badge {
+      font-size:.8125rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+      color:var(--pd); background:var(--pl); border:1px solid var(--pb);
+      border-radius:100px; padding:3px 12px;
+    }
+    .staff-wrap { width:100%; display:flex; justify-content:center; }
+    .target-lbl { font-size:.9375rem; color:var(--g700); font-weight:600; text-align:center; }
+    .target-lbl strong { color:var(--pd); }
+
+    /* Controls */
+    .ctrl-row { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+    .btn-listen {
+      display:inline-flex; align-items:center; gap:8px;
+      background:var(--g); color:#fff; border:none; cursor:pointer;
+      padding:10px 20px; border-radius:var(--r-sm); font-size:.9375rem; font-weight:700;
+      font-family:inherit; transition:all .2s; box-shadow:0 2px 8px rgba(16,185,129,.3);
+    }
+    .btn-listen:hover:not(:disabled) { background:var(--gd); transform:translateY(-1px); }
+    .btn-listen:disabled { opacity:.45; cursor:not-allowed; }
+    .btn-sing {
+      display:inline-flex; align-items:center; gap:8px;
+      background:var(--p); color:#fff; border:none; cursor:pointer;
+      padding:10px 20px; border-radius:var(--r-sm); font-size:.9375rem; font-weight:700;
+      font-family:inherit; transition:all .2s; box-shadow:0 2px 8px rgba(124,58,237,.3);
+    }
+    .btn-sing:hover:not(:disabled) { background:var(--pd); transform:translateY(-1px); }
+    .btn-sing:disabled { opacity:.45; cursor:not-allowed; }
+    .btn-sing.active { animation:ring 1.3s ease-out infinite; }
+
+    /* Pitch meter */
+    .meter-wrap  { width:100%; display:flex; flex-direction:column; align-items:center; gap:5px; }
+    .meter-wrap canvas { border-radius:8px; display:block; }
+    .cents-label { font-size:.75rem; font-weight:700; color:var(--g500); }
+    .hold-bar-wrap {
+      width:100%; max-width:220px; height:6px; background:var(--g200); border-radius:3px; overflow:hidden;
+    }
+    .hold-bar { height:100%; background:linear-gradient(to right,var(--p),var(--g)); border-radius:3px; width:0%; transition:width .1s linear; }
+
+    /* Feedback */
+    .feedback {
+      width:100%; border-radius:var(--r-md); padding:12px 16px;
+      font-size:1rem; font-weight:700; text-align:center; border:1px solid transparent;
+    }
+    .feedback.ok  { background:var(--gl);     color:var(--gd);  border-color:var(--gb); animation:bounce .4s ease; }
+    .feedback.err { background:var(--red-bg); color:#991b1b;    border-color:var(--red-b); animation:shake .35s ease; }
+
+    .hint { font-size:.8125rem; color:var(--g400); text-align:center; }
+
+    /* End screen */
+    .end-screen {
+      flex:1; display:flex; flex-direction:column; align-items:center;
+      justify-content:center; gap:20px; padding:32px 20px; text-align:center;
+    }
+    .end-ico   { font-size:4rem; animation:pop .5s ease; }
+    .end-title { font-size:1.875rem; font-weight:800; color:var(--g900); }
+    .end-sub   { color:var(--g500); font-size:.9375rem; max-width:340px; }
+    .stat-row  { display:flex; gap:14px; flex-wrap:wrap; justify-content:center; }
+    .stat-box  { background:#fff; border-radius:var(--r-md); padding:14px 22px; box-shadow:var(--sh-sm); min-width:80px; }
+    .stat-v    { font-size:1.625rem; font-weight:800; color:var(--g900); }
+    .stat-l    { font-size:.75rem; color:var(--g500); margin-top:3px; }
+    .acc-bar   { width:100%; max-width:280px; height:14px; background:var(--g200); border-radius:100px; overflow:hidden; }
+    .acc-fill  { height:100%; background:linear-gradient(to right,var(--p),var(--g)); border-radius:100px; transition:width 1.2s ease; }
+    .btn-row   { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+
+    .spinner-sm { width:15px; height:15px; border:2px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation:spin 1s linear infinite; display:inline-block; }
+    .mic-err {
+      background:#fef3c7; border:1px solid #fcd34d; border-radius:var(--r-md);
+      padding:12px 16px; font-size:.875rem; color:#92400e;
+      max-width:380px; text-align:center; margin:0 auto;
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+'use strict';
+
+// ── Data ──────────────────────────────────────────────────────────────────────
+
+const INTERVALS = [
+  { st:0,  name:'Unísono',  tag:'P1'  },
+  { st:1,  name:'2ª menor', tag:'m2'  },
+  { st:2,  name:'2ª mayor', tag:'M2'  },
+  { st:3,  name:'3ª menor', tag:'m3'  },
+  { st:4,  name:'3ª mayor', tag:'M3'  },
+  { st:5,  name:'4ª justa', tag:'P4'  },
+  { st:6,  name:'Tritono',  tag:'TT'  },
+  { st:7,  name:'5ª justa', tag:'P5'  },
+  { st:8,  name:'6ª menor', tag:'m6'  },
+  { st:9,  name:'6ª mayor', tag:'M6'  },
+  { st:10, name:'7ª menor', tag:'m7'  },
+  { st:11, name:'7ª mayor', tag:'M7'  },
+  { st:12, name:'Octava',   tag:'P8'  },
+];
+
+const LEVELS = [
+  {
+    id:'basico', label:'Básico', icon:'🌱',
+    desc:'Unísonos, 2ª mayor y 3ª mayor. Perfectos para empezar.',
+    pool:[0, 2, 4],
+    tags:['Unísono','2ª Mayor','3ª Mayor'],
+  },
+  {
+    id:'intermedio', label:'Intermedio', icon:'🎤',
+    desc:'Hasta la 5ª justa. Los intervalos más usados en música.',
+    pool:[0, 2, 3, 4, 5, 7, 9],
+    tags:['Unísono','2das','3ras','4ª Justa','5ª Justa','6ª Mayor'],
+  },
+  {
+    id:'avanzado', label:'Avanzado', icon:'🏆',
+    desc:'Los 13 intervalos completos, incluyendo disonantes.',
+    pool:[0,1,2,3,4,5,6,7,8,9,10,11,12],
+    tags:['Todos los intervalos'],
+  },
+];
+
+// Staff helpers (same as intervaltrainer)
+const INOTE = [
+  {step:0,acc:''  },{step:0,acc:'♯'},{step:1,acc:''  },{step:1,acc:'♯'},
+  {step:2,acc:''  },{step:3,acc:''  },{step:3,acc:'♯'},{step:4,acc:''  },
+  {step:4,acc:'♯'},{step:5,acc:''  },{step:5,acc:'♯'},{step:6,acc:''  },
+  {step:7,acc:''  },
+];
+const STEP_Y   = [102,96,90,84,78,72,66,60];
+const STEP_SOL = ['Do','Re','Mi','Fa','Sol','La','Si','Do'];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+const S = {
+  tsid:    new URLSearchParams(location.search).get('tsid'),
+  level:   null,
+  current: null,
+  phase:   'home',
+  qNum:    0, qTotal: 10,
+  correct: 0,
+  audioCtx: null,
+  stream:  null,
+  analyser:null,
+  rafId:   null,
+  onTargetMs: 0,
+  targetFreq: 0,
+  listenStart: 0,
+};
+
+// ── Audio synthesis ───────────────────────────────────────────────────────────
+function getCtx() {
+  if (!S.audioCtx) S.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (S.audioCtx.state === 'suspended') S.audioCtx.resume();
+  return S.audioCtx;
+}
+function midiToHz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+function playTone(ctx, freq, t0, dur) {
+  const osc = ctx.createOscillator(), g = ctx.createGain();
+  osc.type = 'sine'; osc.frequency.value = freq;
+  osc.connect(g); g.connect(ctx.destination);
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(0.28, t0 + 0.03);
+  g.gain.setValueAtTime(0.28, t0 + dur - 0.06);
+  g.gain.linearRampToValueAtTime(0, t0 + dur);
+  osc.start(t0); osc.stop(t0 + dur);
+}
+function playInterval(st) {
+  const ctx  = getCtx();
+  const base = 60; // C4
+  const top  = base + st;
+  const t0   = ctx.currentTime + 0.05;
+  const dur  = 1.0, gap = 0.1;
+  playTone(ctx, midiToHz(base), t0, dur);
+  playTone(ctx, midiToHz(top),  t0 + dur + gap, dur);
+  return (dur * 2 + gap + 0.25) * 1000;
+}
+
+// ── Pitch detection ───────────────────────────────────────────────────────────
+function autoCorrelate(buf, sampleRate) {
+  const N = buf.length;
+  let rms = 0;
+  for (let i = 0; i < N; i++) rms += buf[i] * buf[i];
+  rms = Math.sqrt(rms / N);
+  if (rms < 0.012) return -1;
+
+  // Trim to zero-crossings to reduce noise
+  let r1 = 0, r2 = N - 1;
+  for (let i = 0; i < N / 2; i++) if (Math.abs(buf[i]) < 0.2)  { r1 = i; break; }
+  for (let i = 1; i < N / 2; i++) if (Math.abs(buf[N - i]) < 0.2) { r2 = N - i; break; }
+  const b = buf.slice(r1, r2);
+  const L = b.length;
+  if (L < 80) return -1;
+
+  // Autocorrelation
+  const c = new Float32Array(L);
+  for (let i = 0; i < L; i++)
+    for (let j = 0; j < L - i; j++)
+      c[i] += b[j] * b[j + i];
+
+  // Find first dip, then global max after it
+  let d = 0;
+  while (d < L - 1 && c[d] > c[d + 1]) d++;
+  let maxVal = -1, maxPos = -1;
+  for (let i = d; i < L; i++) if (c[i] > maxVal) { maxVal = c[i]; maxPos = i; }
+  if (maxPos < 1 || maxPos >= L - 1) return -1;
+
+  // Parabolic interpolation (sub-sample accuracy)
+  const x1 = c[maxPos - 1], x2 = c[maxPos], x3 = c[maxPos + 1];
+  const a = (x1 + x3 - 2 * x2) / 2, b2 = (x3 - x1) / 2;
+  let T0 = maxPos;
+  if (a) T0 -= b2 / (2 * a);
+  return sampleRate / T0;
+}
+function hzToCents(hz, target) { return 1200 * Math.log2(hz / target); }
+
+// ── Microphone ────────────────────────────────────────────────────────────────
+async function startMic() {
+  const ctx = getCtx();
+  S.stream   = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+  const src  = ctx.createMediaStreamSource(S.stream);
+  S.analyser = ctx.createAnalyser();
+  S.analyser.fftSize = 2048;
+  src.connect(S.analyser);
+}
+function stopMic() {
+  if (S.rafId)  { cancelAnimationFrame(S.rafId); S.rafId = null; }
+  if (S.stream) { S.stream.getTracks().forEach(t => t.stop()); S.stream = null; }
+  S.analyser = null;
+  S.onTargetMs = 0;
+}
+
+// ── Staff SVG ─────────────────────────────────────────────────────────────────
+function buildStaff(st, state) {
+  const { step: ts, acc: ta } = INOTE[st];
+  const rootX = 78, rootY = 102;
+  const topX  = st === 0 ? 116 : 208;
+  const topY  = STEP_Y[ts];
+  const color = state === 'correct' ? '#059669' : state === 'wrong' ? '#ef4444' : '#374151';
+  const LINES = [90, 78, 66, 54, 42];
+
+  const head   = (cx,cy) => `<ellipse cx="${cx}" cy="${cy}" rx="8.5" ry="6.5" fill="none" stroke="${color}" stroke-width="2"/>`;
+  const ledger = (cx,cy) => `<line x1="${cx-15}" y1="${cy}" x2="${cx+15}" y2="${cy}" stroke="${color}" stroke-width="1.8"/>`;
+  const lbl    = (cx,cy,t)=> `<text x="${cx}" y="${cy}" text-anchor="middle" font-size="10" fill="${color}" stroke="none" font-family="sans-serif" font-weight="600">${t}</text>`;
+
+  let o = `<svg viewBox="0 0 300 128" width="100%" style="max-width:310px;overflow:visible" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round">`;
+  LINES.forEach(y => o += `<line x1="10" y1="${y}" x2="288" y2="${y}"/>`);
+  o += `<line x1="10" y1="42" x2="10" y2="90" stroke-width="1.5"/>`;
+  o += `<text x="7" y="100" font-family="serif" font-size="68" fill="${color}" stroke="none">𝄞</text>`;
+  // Root C4 — always needs ledger line
+  o += ledger(rootX, rootY);
+  o += head(rootX, rootY);
+  o += lbl(rootX, 118, 'Do');
+  // Top note
+  if (topY >= 96) o += ledger(topX, topY);
+  if (topY <= 40) o += ledger(topX, topY);
+  if (ta) o += `<text x="${topX-14}" y="${topY+5}" font-size="15" fill="${color}" stroke="none" font-family="serif">${ta}</text>`;
+  o += head(topX, topY);
+  o += lbl(topX, 118, STEP_SOL[ts] + ta);
+  o += `</svg>`;
+  return o;
+}
+
+// ── Pitch meter canvas ────────────────────────────────────────────────────────
+function drawMeter(canvas, cents) {
+  const W = canvas.width, H = canvas.height;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+
+  // Background
+  ctx.fillStyle = '#f1f5f9';
+  ctx.beginPath();
+  ctx.roundRect ? ctx.roundRect(0,0,W,H,8) : ctx.rect(0,0,W,H);
+  ctx.fill();
+
+  // Green zone ±50 cents
+  const zW = W * 0.33;
+  ctx.fillStyle = 'rgba(16,185,129,.14)';
+  ctx.fillRect(W/2 - zW/2, 0, zW, H);
+
+  // Target center line
+  ctx.strokeStyle = '#10b981'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(W/2,4); ctx.lineTo(W/2,H-4); ctx.stroke();
+
+  if (cents !== null && !isNaN(cents)) {
+    const clamp = Math.max(-100, Math.min(100, cents));
+    const x = W/2 + (clamp/100) * (W/2 - 14);
+    const on = Math.abs(cents) <= 50;
+
+    // Halo when on target
+    if (on) {
+      ctx.fillStyle = 'rgba(16,185,129,.2)';
+      ctx.beginPath(); ctx.arc(x, H/2, 20, 0, Math.PI*2); ctx.fill();
+    }
+    // Indicator dot
+    ctx.fillStyle = on ? '#10b981' : '#7c3aed';
+    ctx.beginPath(); ctx.arc(x, H/2, 10, 0, Math.PI*2); ctx.fill();
+  }
+
+  // Labels
+  ctx.fillStyle = '#9ca3af'; ctx.font = '9px sans-serif';
+  ctx.textAlign = 'left';   ctx.fillText('♭ Bemol',    8,    H-5);
+  ctx.textAlign = 'right';  ctx.fillText('Sostenido ♯', W-8, H-5);
+  ctx.textAlign = 'center'; ctx.fillStyle='#059669'; ctx.fillText('Afinado', W/2, H-5);
+}
+
+// ── Views ─────────────────────────────────────────────────────────────────────
+
+function showHome() {
+  S.phase = 'home';
+  document.getElementById('root').innerHTML = `
+    <div class="hero">
+      <div class="hero-label">🎤 Entrenamiento Vocal · Sonitus Portal</div>
+      <h1>Entona el<br>Intervalo.</h1>
+      <p>Escucha, lee y canta cada intervalo.<br>Retroalimentación instantánea de tu entonación.</p>
+      <button class="btn-hero" id="btn-start">▶ Empezar a Entrenar</button>
+    </div>`;
+  document.getElementById('btn-start').onclick = showLevelSelect;
+}
+
+function showLevelSelect() {
+  S.phase = 'levelselect';
+  stopMic();
+  document.getElementById('root').innerHTML = `
+    <div class="sel-screen">
+      <div class="sel-title">¿Cuál es tu nivel?</div>
+      <div class="sel-sub">Elige la dificultad que mejor se adapta a tu entrenamiento vocal actual.</div>
+      <div class="level-grid">
+        ${LEVELS.map(lv => `
+          <div class="level-card" data-id="${lv.id}">
+            <div class="lc-ico">${lv.icon}</div>
+            <div>
+              <div class="lc-name">${lv.label}</div>
+              <div class="lc-desc">${lv.desc}</div>
+              <div class="lc-tags">${lv.tags.map(t=>`<span class="iv-tag">${t}</span>`).join('')}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  document.querySelectorAll('.level-card').forEach(el =>
+    el.addEventListener('click', () => startRound(el.dataset.id)));
+}
+
+function startRound(levelId) {
+  S.level   = LEVELS.find(l => l.id === levelId);
+  S.qNum    = 0;
+  S.correct = 0;
+  nextQuestion();
+}
+
+function nextQuestion() {
+  stopMic();
+  S.qNum++;
+  if (S.qNum > S.qTotal) { showRoundEnd(); return; }
+  const pool = S.level.pool;
+  const st   = pool[Math.floor(Math.random() * pool.length)];
+  S.current  = INTERVALS.find(iv => iv.st === st);
+  S.targetFreq = midiToHz(60 + st);
+  renderExercise(null);
+}
+
+// ── Exercise renderer ─────────────────────────────────────────────────────────
+// state: null | 'listening' | 'correct' | 'wrong'
+function renderExercise(state) {
+  const { st, name, tag } = S.current;
+  const topNote = STEP_SOL[INOTE[st].step] + INOTE[st].acc;
+  const pct = Math.round(((S.qNum - 1) / S.qTotal) * 100);
+  const done = state === 'correct' || state === 'wrong';
+
+  document.getElementById('root').innerHTML = `
+    <main>
+      <div class="score-bar">
+        <div class="score-badge">🎤 ${S.correct} correctas</div>
+        <div class="q-counter">${S.qNum} / ${S.qTotal}</div>
+      </div>
+      <div class="prog-wrap"><div class="prog-bar" style="width:${pct}%"></div></div>
+
+      <div class="q-card">
+        <div class="iv-badge">${name} <span style="opacity:.55;font-size:.7rem">${tag}</span></div>
+
+        <div class="staff-wrap">
+          ${buildStaff(st, state === 'correct' ? 'correct' : state === 'wrong' ? 'wrong' : null)}
+        </div>
+
+        <div class="target-lbl">Canta la 2ª nota: <strong>${topNote}${st >= 12 ? '5' : '4'}</strong></div>
+
+        <div class="ctrl-row">
+          <button class="btn-listen" id="btn-listen" ${done ? 'disabled' : ''}>▶ Escuchar</button>
+          <button class="btn-sing${state==='listening'?' active':''}" id="btn-sing"
+            ${done ? 'disabled' : ''}
+            ${state==='listening' ? 'style="background:#6d28d9;cursor:default"' : ''}>
+            ${state==='listening'
+              ? '<span class="spinner-sm"></span> Escuchando…'
+              : '🎤 Cantar'}
+          </button>
+        </div>
+
+        ${state === 'listening' ? `
+          <div class="meter-wrap">
+            <canvas id="pitch-canvas" width="300" height="62"></canvas>
+            <div class="cents-label" id="cents-lbl">— canta ahora</div>
+            <div class="hold-bar-wrap">
+              <div class="hold-bar" id="hold-bar"></div>
+            </div>
+          </div>
+          <div class="hint">Sostén <strong>${topNote}</strong> afinada durante 0.8 s</div>
+        ` : ''}
+
+        ${state === 'correct' ? `
+          <div class="feedback ok">✅ ¡Correcto! Entonación perfecta</div>
+          <button class="btn-primary g" id="btn-next">Siguiente →</button>
+        ` : ''}
+
+        ${state === 'wrong' ? `
+          <div class="feedback err">⏱ Tiempo agotado — la nota era <strong>${topNote}</strong></div>
+          <button class="btn-primary" id="btn-next">Siguiente →</button>
+        ` : ''}
+      </div>
+
+      ${!done && state !== 'listening' ? `
+        <p class="hint">Escucha el intervalo primero, luego presiona Cantar</p>` : ''}
+    </main>`;
+
+  // Wire listen button
+  const listenBtn = document.getElementById('btn-listen');
+  if (listenBtn) {
+    listenBtn.addEventListener('click', () => {
+      listenBtn.disabled = true;
+      const wait = playInterval(st);
+      setTimeout(() => { if (document.getElementById('btn-listen')) document.getElementById('btn-listen').disabled = false; }, wait);
+    });
+  }
+
+  // Wire sing button
+  const singBtn = document.getElementById('btn-sing');
+  if (singBtn && !done) singBtn.addEventListener('click', onSingClick);
+
+  // Wire next button
+  document.getElementById('btn-next')?.addEventListener('click', nextQuestion);
+
+  // Draw empty meter immediately if listening
+  if (state === 'listening') {
+    const c = document.getElementById('pitch-canvas');
+    if (c) drawMeter(c, null);
+  }
+}
+
+// ── Listening ─────────────────────────────────────────────────────────────────
+const TIMEOUT_MS  = 5000;
+const HOLD_MS     = 800;
+const TOLERANCE   = 50; // cents
+
+async function onSingClick() {
+  const btn = document.getElementById('btn-sing');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-sm"></span>'; }
+
+  try {
+    await startMic();
+  } catch (_) {
+    document.getElementById('root').insertAdjacentHTML('beforeend', `
+      <div class="mic-err" style="margin-top:12px">
+        ⚠️ No se pudo acceder al micrófono. Permite el acceso en tu navegador e intenta de nuevo.
+      </div>`);
+    return;
+  }
+
+  S.listenStart = performance.now();
+  S.onTargetMs  = 0;
+  renderExercise('listening');
+  tickListen();
+}
+
+function tickListen() {
+  if (!S.analyser) return;
+
+  const buf = new Float32Array(S.analyser.fftSize);
+  S.analyser.getFloatTimeDomainData(buf);
+  const hz = autoCorrelate(buf, S.audioCtx.sampleRate);
+
+  const elapsed = performance.now() - S.listenStart;
+  const canvas  = document.getElementById('pitch-canvas');
+  const centsEl = document.getElementById('cents-lbl');
+  const holdBar = document.getElementById('hold-bar');
+
+  let cents = null, onTarget = false;
+
+  if (hz > 0) {
+    cents    = hzToCents(hz, S.targetFreq);
+    onTarget = Math.abs(cents) <= TOLERANCE;
+    if (canvas) drawMeter(canvas, cents);
+    if (centsEl) {
+      const sign = cents >= 0 ? '+' : '';
+      centsEl.textContent = `${sign}${Math.round(cents)} cents`;
+      centsEl.style.color = onTarget ? '#059669' : '#6b7280';
+    }
+  } else {
+    if (canvas) drawMeter(canvas, null);
+    if (centsEl) { centsEl.textContent = '— canta ahora'; centsEl.style.color = '#9ca3af'; }
+  }
+
+  if (onTarget) {
+    S.onTargetMs += 16;
+    if (holdBar) holdBar.style.width = Math.min(100, (S.onTargetMs / HOLD_MS) * 100) + '%';
+    if (S.onTargetMs >= HOLD_MS) {
+      stopMic();
+      S.correct++;
+      renderExercise('correct');
+      return;
+    }
+  } else {
+    S.onTargetMs = 0;
+    if (holdBar) holdBar.style.width = '0%';
+  }
+
+  if (elapsed >= TIMEOUT_MS) {
+    stopMic();
+    renderExercise('wrong');
+    return;
+  }
+
+  S.rafId = requestAnimationFrame(tickListen);
+}
+
+// ── Round end ─────────────────────────────────────────────────────────────────
+function showRoundEnd() {
+  stopMic();
+  S.phase = 'roundend';
+  const pct   = Math.round((S.correct / S.qTotal) * 100);
+  const emoji = pct >= 90 ? '🏆' : pct >= 70 ? '🎤' : pct >= 50 ? '🎵' : '💪';
+  const title = pct >= 90 ? '¡Oído perfecto!' : pct >= 70 ? '¡Muy buen oído!' : pct >= 50 ? '¡Buen intento!' : '¡Sigue practicando!';
+
+  document.getElementById('root').innerHTML = `
+    <div class="end-screen">
+      <div class="end-ico">${emoji}</div>
+      <div class="end-title">${title}</div>
+      <div class="end-sub">Completaste ${S.qTotal} ejercicios vocales · Nivel ${S.level.label}</div>
+      <div class="stat-row">
+        <div class="stat-box"><div class="stat-v">${S.correct}</div><div class="stat-l">Correctas</div></div>
+        <div class="stat-box"><div class="stat-v">${S.qTotal - S.correct}</div><div class="stat-l">Fallidas</div></div>
+        <div class="stat-box"><div class="stat-v">${pct}%</div><div class="stat-l">Precisión</div></div>
+      </div>
+      <div class="acc-bar"><div class="acc-fill" id="acc-fill" style="width:0%"></div></div>
+      <div class="btn-row">
+        <button class="btn-primary g" id="btn-again">↻ Repetir ronda</button>
+        <button class="btn-secondary"  id="btn-level">Cambiar nivel</button>
+      </div>
+    </div>`;
+
+  setTimeout(() => {
+    const el = document.getElementById('acc-fill');
+    if (el) el.style.width = pct + '%';
+  }, 120);
+
+  document.getElementById('btn-again').addEventListener('click', () => startRound(S.level.id));
+  document.getElementById('btn-level').addEventListener('click', showLevelSelect);
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+showHome();
+</script>
+</body>
+</html>

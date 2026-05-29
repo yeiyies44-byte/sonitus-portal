@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sonitus · Entrenador de Intervalos</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --g: #10b981; --gd: #059669; --gl: #ecfdf5; --gb: #a7f3d0;
+      --red: #ef4444; --red-bg: #fef2f2; --red-b: #fecaca;
+      --gold: #f59e0b; --gold-bg: #fffbeb; --gold-b: #fde68a;
+      --g50: #f9fafb; --g100: #f3f4f6; --g200: #e5e7eb; --g300: #d1d5db;
+      --g400: #9ca3af; --g500: #6b7280; --g700: #374151; --g900: #111827;
+      --r-sm: 8px; --r-md: 12px; --r-lg: 16px;
+      --sh-sm: 0 1px 3px rgba(0,0,0,.08); --sh-md: 0 4px 16px rgba(0,0,0,.1);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 50%, #f5fffe 100%);
+      min-height: 100vh; color: var(--g900); line-height: 1.5;
+      display: flex; flex-direction: column;
+    }
+
+    @keyframes fadeIn   { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes bounce   { 0%,100%{transform:translateY(0)} 40%{transform:translateY(-10px)} }
+    @keyframes shake    { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-7px)} 60%{transform:translateX(7px)} }
+    @keyframes spin     { to{transform:rotate(360deg)} }
+    @keyframes glow     { 0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.4)} 50%{box-shadow:0 0 0 10px rgba(16,185,129,0)} }
+    @keyframes pop      { 0%{transform:scale(.7);opacity:0} 60%{transform:scale(1.2)} 100%{transform:scale(1);opacity:1} }
+    @keyframes lostLife { 0%{transform:scale(1)} 30%{transform:scale(1.5)} 60%{transform:scale(.8)} 100%{transform:scale(1)} }
+
+    /* ── Header (juego) ── */
+    .hd {
+      background: #fff;
+      border-bottom: 2px solid var(--gb);
+      color: var(--g700); padding: 10px 16px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      box-shadow: var(--sh-sm); flex-shrink: 0; position: relative; z-index: 20;
+    }
+    .hd-left  { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .hd-mid   { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .hd-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
+    .hd-mode  { font-size: .75rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #15803d; }
+    .hd-level { font-size: .6875rem; background: var(--gl); color: var(--gd); border: 1px solid var(--gb); border-radius: 100px; padding: 2px 8px; font-weight: 600; }
+    .hd-lives { display: flex; gap: 3px; font-size: 1.1rem; }
+    .life     { display: inline-block; transition: all .3s; }
+    .life.lost{ opacity: .22; filter: grayscale(1) brightness(.6); transform: scale(.82); }
+    .hd-streak{ background: var(--gl); color: var(--gd); border: 1px solid var(--gb); border-radius: 100px; padding: 2px 9px; font-size: .8125rem; font-weight: 700; }
+    .hd-xp .v { font-size: 1.0625rem; font-weight: 800; color: var(--gd); text-align: right; }
+    .hd-xp .l { font-size: .625rem; color: var(--g400); text-transform: uppercase; letter-spacing: .04em; text-align: right; }
+    .hd-prog  { width: 60px; height: 4px; background: var(--g200); border-radius: 2px; margin-top: 2px; }
+    .hd-prog-fill { height: 100%; background: var(--g); border-radius: 2px; transition: width .5s ease; }
+    .hd-qnum  { font-size: .625rem; color: var(--g400); text-align: right; }
+
+    /* ── Hero header (pantalla de selección de modo) ── */
+    .brand-hd { text-align: center; }
+    .hero-label { font-size: 11px; text-transform: uppercase; letter-spacing: .18em; color: #22c55e; font-weight: 600; margin-bottom: 16px; }
+    .page-h1 {
+      font-size: clamp(2.5rem, 8vw, 4.5rem);
+      font-weight: 800; color: #16a34a; letter-spacing: -.025em;
+      line-height: 1.05; margin-bottom: 16px;
+    }
+    .page-sub {
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      color: #15803d; max-width: 36rem; margin: 0 auto 28px; line-height: 1.6;
+    }
+    .btn-hero {
+      display: inline-block; padding: 14px 32px;
+      background: #16a34a; color: #fff; font-size: 1rem; font-weight: 700;
+      border: none; border-radius: 12px; cursor: pointer; font-family: inherit;
+      box-shadow: 0 10px 25px -5px rgba(22,163,74,.35);
+      transition: background .15s, transform .15s, box-shadow .15s;
+      min-height: 52px;
+    }
+    .btn-hero:hover { background: #15803d; box-shadow: 0 10px 25px -5px rgba(22,163,74,.5); }
+    .btn-hero:active { transform: scale(.95); }
+
+    /* ── Select screens ── */
+    .sel-screen {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 28px 16px; gap: 20px; text-align: center;
+    }
+    .sel-title { font-size: clamp(1.5rem, 5vw, 2.25rem); font-weight: 800; color: var(--g900); }
+    .sel-sub   { color: var(--g500); font-size: .9375rem; max-width: 400px; }
+    .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%; max-width: 460px; }
+    .mode-card {
+      background: #fff; border-radius: var(--r-lg); padding: 24px 14px;
+      border: 2px solid var(--g200); cursor: pointer; transition: all .2s;
+      display: flex; flex-direction: column; gap: 10px; align-items: center;
+      box-shadow: var(--sh-sm);
+    }
+    .mode-card:hover { border-color: var(--g); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(16,185,129,.18); }
+    .mode-card-ico  { font-size: 2.75rem; }
+    .mode-card-name { font-size: 1.0625rem; font-weight: 700; color: var(--g900); }
+    .mode-card-desc { font-size: .8125rem; color: var(--g500); line-height: 1.5; }
+    .level-grid { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 400px; }
+    .level-card {
+      background: #fff; border-radius: var(--r-md); padding: 14px 16px;
+      border: 2px solid var(--g200); cursor: pointer; transition: all .2s;
+      display: flex; align-items: center; gap: 12px; box-shadow: var(--sh-sm);
+    }
+    .level-card:hover { border-color: var(--g); transform: translateX(5px); }
+    .lc-ico  { font-size: 1.75rem; flex-shrink: 0; }
+    .lc-info { flex: 1; text-align: left; }
+    .lc-name { font-size: .9375rem; font-weight: 700; }
+    .lc-desc { font-size: .8125rem; color: var(--g500); margin-top: 2px; }
+    .lc-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+    .iv-tag  { font-size: .6875rem; background: var(--gl); color: var(--gd); border: 1px solid var(--gb); border-radius: 100px; padding: 1px 7px; font-weight: 600; }
+    .btn-back-sm {
+      background: none; border: 1px solid var(--g300); border-radius: var(--r-sm);
+      color: var(--g500); padding: 6px 14px; font-size: .8125rem; font-weight: 600;
+      cursor: pointer; font-family: inherit; transition: all .15s;
+    }
+    .btn-back-sm:hover { background: var(--g100); color: var(--g700); }
+
+    /* ── Game main ── */
+    main {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      padding: 16px; gap: 14px; max-width: 540px; margin: 0 auto; width: 100%;
+    }
+    .q-card {
+      background: #fff; border-radius: var(--r-lg); padding: 20px 18px;
+      box-shadow: var(--sh-md); width: 100%; border: 1px solid var(--gb);
+      animation: fadeIn .3s ease; display: flex; flex-direction: column; align-items: center; gap: 14px;
+    }
+    .mode-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--gl); color: var(--gd); border: 1px solid var(--gb);
+      border-radius: 100px; padding: 3px 12px; font-size: .8125rem; font-weight: 700;
+    }
+
+    /* Audio mode visual */
+    .audio-visual {
+      display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 60px;
+    }
+    .note-dot {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: var(--gl); border: 2px solid var(--gb);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.375rem; transition: all .25s;
+    }
+    .note-dot.playing { background: var(--g); border-color: var(--gd); color: #fff; animation: glow .6s ease-in-out infinite; }
+    .arrow { font-size: 1.5rem; color: var(--g400); transition: color .2s; }
+    .arrow.lit { color: var(--g); }
+    .btn-play {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--g); color: #fff; border: none; cursor: pointer;
+      padding: 10px 22px; border-radius: var(--r-sm); font-size: .9375rem; font-weight: 700;
+      font-family: inherit; transition: all .2s; box-shadow: 0 2px 8px rgba(16,185,129,.35);
+    }
+    .btn-play:hover:not(:disabled) { background: var(--gd); transform: translateY(-1px); }
+    .btn-play:disabled { opacity: .45; cursor: not-allowed; }
+    .spinner-sm { width: 15px; height: 15px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: spin .8s linear infinite; }
+    .hint-txt { font-size: .8125rem; color: var(--g400); }
+
+    /* Staff visual */
+    .staff-wrap { width: 100%; display: flex; justify-content: center; padding: 4px 0; }
+
+    /* Answer grid */
+    .q-label { font-size: .9375rem; font-weight: 700; color: var(--g700); text-align: center; }
+    .answer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+    .btn-ans {
+      padding: 13px 8px; border-radius: var(--r-md); border: 2px solid var(--g200);
+      background: #fff; font-size: .9375rem; font-weight: 600; color: var(--g700);
+      cursor: pointer; transition: all .18s; font-family: inherit; line-height: 1.2;
+    }
+    .btn-ans:hover:not(:disabled) { border-color: var(--g); color: var(--gd); background: var(--gl); transform: translateY(-1px); }
+    .btn-ans:disabled { cursor: not-allowed; }
+    .btn-ans.correct { border-color: var(--g); background: var(--gl); color: var(--gd); animation: bounce .4s ease; }
+    .btn-ans.wrong   { border-color: var(--red); background: var(--red-bg); color: #991b1b; animation: shake .35s ease; }
+    .btn-ans.reveal  { border-color: var(--g); background: var(--gl); color: var(--gd); }
+
+    /* Feedback */
+    .feedback {
+      width: 100%; border-radius: var(--r-md); padding: 12px 16px;
+      font-size: .9375rem; font-weight: 600; text-align: center;
+      display: none; animation: fadeIn .2s ease;
+    }
+    .feedback.show { display: block; }
+    .feedback.ok   { background: var(--gl); color: var(--gd); border: 1px solid var(--gb); }
+    .feedback.err  { background: var(--red-bg); color: #991b1b; border: 1px solid var(--red-b); }
+    .xp-pill { display: inline-block; background: var(--gold); color: #78350f; border-radius: 100px; padding: 1px 9px; font-size: .8125rem; margin-left: 6px; font-weight: 700; }
+
+    /* ── End screens ── */
+    .end-screen {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 18px; padding: 28px 20px; text-align: center;
+    }
+    .end-ico   { font-size: 3.75rem; animation: pop .5s ease; }
+    .end-title { font-size: 1.875rem; font-weight: 800; color: var(--g900); }
+    .end-sub   { color: var(--g500); font-size: .9375rem; }
+    .stat-row  { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+    .stat-box  { background: #fff; border-radius: var(--r-md); padding: 14px 20px; box-shadow: var(--sh-sm); text-align: center; min-width: 80px; }
+    .stat-v    { font-size: 1.5rem; font-weight: 800; color: var(--g900); }
+    .stat-l    { font-size: .75rem; color: var(--g500); margin-top: 2px; }
+    .rnd-bar   { width: 100%; max-width: 280px; background: var(--g200); border-radius: 100px; height: 14px; overflow: hidden; }
+    .rnd-fill  { height: 100%; background: linear-gradient(to right, var(--g), var(--gd)); border-radius: 100px; transition: width 1s ease; }
+    .upgrade-box { background: var(--gold-bg); border: 1px solid var(--gold-b); border-radius: var(--r-md); padding: 12px 16px; font-size: .875rem; color: #78350f; max-width: 340px; }
+    .btn-row   { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+    .btn-primary {
+      background: var(--g); color: #fff; border: none; cursor: pointer;
+      padding: 13px 30px; border-radius: var(--r-sm); font-size: .9375rem; font-weight: 700;
+      font-family: inherit; transition: all .2s; box-shadow: 0 3px 12px rgba(16,185,129,.4);
+    }
+    .btn-primary:hover { background: var(--gd); transform: translateY(-1px); }
+    .btn-secondary {
+      background: #fff; color: var(--g700); border: 2px solid var(--g300); cursor: pointer;
+      padding: 11px 22px; border-radius: var(--r-sm); font-size: .875rem; font-weight: 600;
+      font-family: inherit; transition: all .2s;
+    }
+    .btn-secondary:hover { background: var(--g100); border-color: var(--g400); }
+
+    /* ── Modo Estudio ── */
+    .study-bar { display:flex; align-items:center; justify-content:space-between; padding:12px 16px 0; max-width:800px; margin:0 auto; width:100%; }
+    .study-bar span { font-size:.9375rem; font-weight:700; color:var(--g700); }
+    .study-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px; padding:14px 16px 24px; width:100%; max-width:800px; margin:0 auto; }
+    .study-card { background:#fff; border-radius:var(--r-lg); border:1px solid var(--g200); box-shadow:var(--sh-sm); overflow:hidden; animation:fadeIn .3s ease; }
+    .sc-top { padding:12px 14px 4px; display:flex; align-items:baseline; justify-content:space-between; }
+    .sc-top .sc-name { font-size:1rem; font-weight:800; }
+    .sc-top .sc-meta { font-size:.75rem; color:var(--g400); font-weight:600; }
+    .sc-staff { padding:2px 8px; display:flex; justify-content:center; }
+    .sc-char { padding:0 14px 8px; font-size:.75rem; color:var(--g500); font-style:italic; }
+    .sc-btns { padding:10px 14px; border-top:1px solid #f3f4f6; display:flex; gap:6px; }
+    .btn-hear { flex:1; padding:7px 4px; border-radius:var(--r-sm); border:1px solid var(--g200); background:#fff; font-size:.75rem; font-weight:600; color:var(--g700); cursor:pointer; font-family:inherit; transition:all .15s; }
+    .btn-hear:hover { border-color:var(--g); color:var(--gd); background:var(--gl); }
+    .btn-hear.playing { border-color:var(--g); background:var(--gl); color:var(--gd); }
+
+    /* ── Juego 60s ── */
+    .game60 { flex:1; display:flex; flex-direction:column; align-items:center; padding:16px; gap:12px; max-width:520px; margin:0 auto; width:100%; }
+    .g60-top { display:flex; align-items:center; justify-content:space-between; width:100%; }
+    .timer-ring { position:relative; width:64px; height:64px; flex-shrink:0; }
+    .timer-num { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:1.25rem; font-weight:800; color:var(--g700); pointer-events:none; }
+    .timer-num.urgent { color:var(--red); }
+    .g60-scores { display:flex; gap:18px; flex:1; justify-content:flex-end; }
+    .g60-stat .val { font-size:1.2rem; font-weight:800; color:var(--g900); text-align:center; }
+    .g60-stat .lbl { font-size:.6875rem; color:var(--g400); text-transform:uppercase; letter-spacing:.04em; text-align:center; }
+    .g60-q-card { background:#fff; border-radius:var(--r-lg); padding:12px 16px 8px; box-shadow:var(--sh-md); width:100%; text-align:center; border:1px solid var(--gb); animation:fadeIn .25s ease; }
+    .g60-q-label { font-size:.75rem; font-weight:700; color:var(--g400); text-transform:uppercase; letter-spacing:.06em; margin-bottom:4px; }
+    .g60-fb { height:26px; display:flex; align-items:center; justify-content:center; font-size:.9375rem; font-weight:700; }
+    .g60-fb.ok  { color:var(--gd); }
+    .g60-fb.err { color:#991b1b; }
+    .g60-sum { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; padding:28px 20px; text-align:center; animation:fadeIn .4s ease; }
+  </style>
+</head>
+<body>
+
+  <header id="hd" class="hd" style="display:none">
+    <div class="hd-left">
+      <span id="hd-ico" style="font-size:1.25rem"></span>
+      <div>
+        <div class="hd-mode" id="hd-mode"></div>
+        <div class="hd-level" id="hd-level"></div>
+      </div>
+    </div>
+    <div class="hd-mid">
+      <div class="hd-lives" id="hd-lives"></div>
+      <div class="hd-streak" id="hd-streak" style="display:none">🧠 <span id="hd-streak-n">0</span></div>
+    </div>
+    <div class="hd-right">
+      <div class="hd-xp">
+        <div class="v" id="hd-xp">0</div>
+        <div class="l">XP</div>
+      </div>
+      <div class="hd-prog"><div class="hd-prog-fill" id="hd-bar" style="width:0%"></div></div>
+      <div class="hd-qnum" id="hd-qnum">0 / 10</div>
+    </div>
+  </header>
+
+  <div id="root" style="flex:1;display:flex;flex-direction:column;"></div>
+
+<script>
+// ── Datos ────────────────────────────────────────────────────────────────────
+const INTERVALS = [
+  { name:'Unísono',  st:0  }, { name:'2ª menor', st:1  }, { name:'2ª mayor', st:2  },
+  { name:'3ª menor', st:3  }, { name:'3ª mayor', st:4  }, { name:'4ª justa', st:5  },
+  { name:'Tritono',  st:6  }, { name:'5ª justa', st:7  }, { name:'6ª menor', st:8  },
+  { name:'6ª mayor', st:9  }, { name:'7ª menor', st:10 }, { name:'7ª mayor', st:11 },
+  { name:'Octava',   st:12 },
+];
+const LEVELS = {
+  easy:   { label:'Fácil',   emoji:'🌱', sts:[0,5,7,12],              desc:'Los 4 intervalos más reconocibles' },
+  medium: { label:'Medio',   emoji:'🎯', sts:[0,3,4,5,7,9,12],       desc:'Añade terceras y 6ª mayor' },
+  hard:   { label:'Difícil', emoji:'🧠', sts:[0,1,2,3,4,5,6,7,8,9,10,11,12], desc:'Los 13 intervalos completos' },
+};
+const PLAY_MODES  = ['ascending','descending','harmonic'];
+const MODE_LABEL  = { ascending:'↗ Ascendente', descending:'↘ Descendente', harmonic:'≡ Armónico' };
+
+// Staff notation: semitone → diatonic step from C4 + accidental
+// Staff: line1(E4)=y90, line2(G4)=y78, line3(B4)=y66, line4(D5)=y54, line5(F5)=y42 (sp=12)
+// C4(ledger)=y102, D4=y96, E4=y90, F4=y84, G4=y78, A4=y72, B4=y66, C5=y60
+const INOTE = [
+  { step:0, acc:'' },   // 0  Unísono – C
+  { step:1, acc:'♭' },  // 1  2ª menor – Db
+  { step:1, acc:'' },   // 2  2ª mayor – D
+  { step:2, acc:'♭' },  // 3  3ª menor – Eb
+  { step:2, acc:'' },   // 4  3ª mayor – E
+  { step:3, acc:'' },   // 5  4ª justa – F
+  { step:3, acc:'♯' },  // 6  Tritono  – F#
+  { step:4, acc:'' },   // 7  5ª justa – G
+  { step:5, acc:'♭' },  // 8  6ª menor – Ab
+  { step:5, acc:'' },   // 9  6ª mayor – A
+  { step:6, acc:'♭' },  // 10 7ª menor – Bb
+  { step:6, acc:'' },   // 11 7ª mayor – B
+  { step:7, acc:'' },   // 12 Octava   – C5
+];
+const STEP_Y   = [102, 96, 90, 84, 78, 72, 66, 60];
+const STEP_SOL = ['Do','Re','Mi','Fa','Sol','La','Si','Do'];
+
+// ── Estado ───────────────────────────────────────────────────────────────────
+const S = {
+  ctx: null,
+  tsid: new URLSearchParams(location.search).get('tsid'),
+  mode: null, level: null, pool: [],
+  lives: 3, maxLives: 3, score: 0, streak: 0, maxStreak: 0,
+  qNum: 0, qTotal: 10, roundCorrect: 0, roundXP: 0,
+  current: null, answered: false, playing: false,
+};
+
+// ── Audio ─────────────────────────────────────────────────────────────────────
+function getCtx() {
+  if (!S.ctx) S.ctx = new (window.AudioContext || window.webkitAudioContext)();
+  if (S.ctx.state === 'suspended') S.ctx.resume();
+  return S.ctx;
+}
+function midiToHz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+function tone(ctx, freq, t0, dur) {
+  const osc = ctx.createOscillator(), g = ctx.createGain();
+  osc.type = 'triangle'; osc.frequency.value = freq;
+  osc.connect(g); g.connect(ctx.destination);
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(0.26, t0 + 0.025);
+  g.gain.setValueAtTime(0.26, t0 + dur - 0.07);
+  g.gain.linearRampToValueAtTime(0, t0 + dur);
+  osc.start(t0); osc.stop(t0 + dur);
+}
+function scheduleInterval(st, pm) {
+  return new Promise(resolve => {
+    const ctx  = getCtx();
+    const base = 52 + Math.floor(Math.random() * 12);
+    const top  = base + st;
+    const t0   = ctx.currentTime + 0.05;
+    const dur  = 1.1, gap = 0.12;
+    if (pm === 'harmonic') {
+      tone(ctx, midiToHz(base), t0, dur * 1.7);
+      if (st > 0) tone(ctx, midiToHz(top), t0, dur * 1.7);
+      setTimeout(resolve, Math.round((dur * 1.7 + 0.15) * 1000));
+    } else {
+      const [f, s] = pm === 'ascending' ? [midiToHz(base), midiToHz(top)] : [midiToHz(top), midiToHz(base)];
+      tone(ctx, f, t0, dur);
+      tone(ctx, s, t0 + dur + gap, dur);
+      setTimeout(resolve, Math.round((dur * 2 + gap + 0.15) * 1000));
+    }
+  });
+}
+
+// ── Utilidades ────────────────────────────────────────────────────────────────
+function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+function shuffle(a) {
+  const b = [...a];
+  for (let i = b.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [b[i], b[j]] = [b[j], b[i]];
+  }
+  return b;
+}
+function buildChoices(correct, pool) {
+  let wrong = shuffle(pool.filter(x => x.name !== correct.name)).slice(0, 3);
+  if (wrong.length < 3) {
+    const extra = shuffle(INTERVALS.filter(x => x.name !== correct.name && !wrong.some(w => w.name === x.name)));
+    wrong = [...wrong, ...extra.slice(0, 3 - wrong.length)];
+  }
+  return shuffle([correct, ...wrong]);
+}
+
+// ── API ───────────────────────────────────────────────────────────────────────
+async function saveAttempt(intervalName, userAnswer, isCorrect, responseMs) {
+  try {
+    await fetch('/api/activity/interval-attempt', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        toolSessionId: S.tsid ? Number(S.tsid) : null,
+        intervalName, userAnswer, isCorrect, responseMs,
+      }),
+    });
+  } catch(_) {}
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+function showHeader() {
+  const hd = document.getElementById('hd');
+  hd.style.display = 'flex';
+  document.getElementById('hd-ico').textContent  = S.mode === 'oido' ? '🎧' : '🎼';
+  document.getElementById('hd-mode').textContent = S.mode === 'oido' ? 'Oído' : 'Escritura';
+  document.getElementById('hd-level').textContent = LEVELS[S.level].label;
+  updateHeader();
+}
+function hideHeader() { document.getElementById('hd').style.display = 'none'; }
+function updateHeader() {
+  const livesEl = document.getElementById('hd-lives');
+  if (livesEl) livesEl.innerHTML = Array.from({length: S.maxLives}, (_, i) =>
+    `<span class="life${i < S.lives ? '' : ' lost'}">⭐</span>`).join('');
+  const streakEl = document.getElementById('hd-streak');
+  if (streakEl) {
+    streakEl.style.display = S.streak >= 3 ? 'block' : 'none';
+    const sn = document.getElementById('hd-streak-n');
+    if (sn) sn.textContent = S.streak;
+  }
+  const xpEl = document.getElementById('hd-xp');
+  if (xpEl) xpEl.textContent = S.score;
+  const pct = S.qTotal > 0 ? Math.round((S.qNum / S.qTotal) * 100) : 0;
+  const bar = document.getElementById('hd-bar');
+  if (bar) bar.style.width = pct + '%';
+  const qn = document.getElementById('hd-qnum');
+  if (qn) qn.textContent = `${S.qNum} / ${S.qTotal}`;
+}
+
+// ── Staff SVG ─────────────────────────────────────────────────────────────────
+function buildStaffSVG(semitones, answered, isCorrect) {
+  const { step, acc } = INOTE[semitones];
+  const rootY = 102, rootX = 88;
+  const noteY = STEP_Y[step], noteX = 208;
+  const stroke = answered ? (isCorrect ? '#059669' : '#ef4444') : '#374151';
+  const LINES = [90, 78, 66, 54, 42]; // E4, G4, B4, D5, F5
+
+  const head = (cx, cy) =>
+    `<ellipse cx="${cx}" cy="${cy}" rx="8.5" ry="6.5" fill="none" stroke="${stroke}" stroke-width="2"/>`;
+  const ledger = (cx, cy) =>
+    `<line x1="${cx - 15}" y1="${cy}" x2="${cx + 15}" y2="${cy}" stroke="${stroke}" stroke-width="2"/>`;
+  const label = (cx, cy, txt) =>
+    `<text x="${cx}" y="${cy}" text-anchor="middle" font-size="10" fill="${stroke}" stroke="none" font-family="sans-serif" font-weight="600">${txt}</text>`;
+
+  let o = `<svg viewBox="0 0 310 128" width="100%" style="max-width:320px;overflow:visible" fill="none" stroke="${stroke}" stroke-width="1.5" stroke-linecap="round">`;
+
+  for (const ly of LINES) o += `<line x1="10" y1="${ly}" x2="298" y2="${ly}"/>`;
+  o += `<line x1="10" y1="42" x2="10" y2="90" stroke-width="1.5"/>`;
+  o += `<text x="7" y="100" font-family="serif" font-size="68" fill="${stroke}" stroke="none">𝄞</text>`;
+
+  // Root: C4 always needs ledger
+  o += ledger(rootX, rootY);
+  o += head(rootX, rootY);
+  o += label(rootX, 118, 'Do');
+
+  // Second note
+  if (noteY > 90) o += ledger(noteX, noteY);
+  if (noteY < 42) o += ledger(noteX, noteY);
+  if (acc) o += `<text x="${noteX - 14}" y="${noteY + 5}" font-size="15" fill="${stroke}" stroke="none" font-family="serif">${acc}</text>`;
+  o += head(noteX, noteY);
+  o += label(noteX, 118, STEP_SOL[step] + acc);
+
+  o += `</svg>`;
+  return o;
+}
+
+// ── Selección de modo ─────────────────────────────────────────────────────────
+function showModeSelect() {
+  hideHeader();
+  document.getElementById('root').innerHTML = `
+    <div class="sel-screen">
+      <div class="brand-hd">
+        <div class="brand-row">
+          <span style="font-size:1.25rem">🎧</span>
+          <span class="brand-txt">Sonitus Intervalos</span>
+        </div>
+        <h1 class="page-h1">Escucha el Intervalo.<br>Identifícalo.</h1>
+        <p class="page-sub">Entrena tu oído y tu lectura musical. Aprende los 13 intervalos con retroalimentación de audio instantánea.</p>
+        <button class="btn-hero" id="hero-start-btn">▶ Empezar a Entrenar</button>
+      </div>
+      <div class="mode-grid">
+        <div class="mode-card" id="mc-oido">
+          <div class="mode-card-ico">🎧</div>
+          <div class="mode-card-name">Oído</div>
+          <div class="mode-card-desc">Escucha el intervalo e identifica su nombre</div>
+        </div>
+        <div class="mode-card" id="mc-escritura">
+          <div class="mode-card-ico">🎼</div>
+          <div class="mode-card-name">Escritura</div>
+          <div class="mode-card-desc">Lee las notas en el pentagrama e identifica el intervalo</div>
+        </div>
+        <div class="mode-card" id="mc-estudio">
+          <div class="mode-card-ico">📚</div>
+          <div class="mode-card-name">Estudio</div>
+          <div class="mode-card-desc">Ve los 13 intervalos en el pentagrama y escúchalos</div>
+        </div>
+        <div class="mode-card" id="mc-game60">
+          <div class="mode-card-ico">⏱</div>
+          <div class="mode-card-name">60 Segundos</div>
+          <div class="mode-card-desc">Identifica tantos intervalos como puedas antes de que acabe el tiempo</div>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('mc-oido').addEventListener('click', () => showLevelSelect('oido'));
+  document.getElementById('mc-escritura').addEventListener('click', () => showLevelSelect('escritura'));
+  document.getElementById('mc-estudio').addEventListener('click', () => { getCtx(); showStudyMode(); });
+  document.getElementById('mc-game60').addEventListener('click', () => { getCtx(); startGame60(); });
+  document.getElementById('hero-start-btn').addEventListener('click', () => {
+    document.querySelector('.mode-grid').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+}
+
+// ── Modo Estudio ──────────────────────────────────────────────────────────────
+const IV_CHARS = ['Una nota repite. Unidad perfecta.','Paso cromático. Máxima tensión de 2da.','Paso natural de la escala mayor.','Color triste, melancólico.','Color alegre y brillante.','Salto limpio y estable.','Máxima tensión. Diabolus in musica.','Poder y estabilidad. El intervalo del rock.','Nostalgia, dulzura melancólica.','Amplitud y apertura. Muy cantábile.','Tensión que busca resolver.','Tensión intensa, casi resuelta.','Regreso al origen, una octava arriba.'];
+
+function showStudyMode() {
+  hideHeader();
+  document.getElementById('root').innerHTML = `
+    <div style="display:flex;flex-direction:column;min-height:100%">
+      <div class="study-bar">
+        <button class="btn-back-sm" id="study-back">← Menú</button>
+        <span>📚 Estudio — 13 Intervalos</span>
+      </div>
+      <div class="study-grid">
+        ${INTERVALS.map((iv, i) => `
+          <div class="study-card">
+            <div class="sc-top"><span class="sc-name">${iv.name}</span><span class="sc-meta">${iv.st} st</span></div>
+            <div class="sc-staff">${buildStaffSVG(iv.st, false, null)}</div>
+            <div class="sc-char">${IV_CHARS[i]}</div>
+            <div class="sc-btns">
+              <button class="btn-hear" data-i="${i}" data-m="ascending">↗ Asc</button>
+              <button class="btn-hear" data-i="${i}" data-m="descending">↘ Des</button>
+              <button class="btn-hear" data-i="${i}" data-m="harmonic">≡ Arm</button>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  document.getElementById('study-back').addEventListener('click', showModeSelect);
+  const labels = { ascending:'↗ Asc', descending:'↘ Des', harmonic:'≡ Arm' };
+  document.querySelectorAll('.btn-hear').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (btn.classList.contains('playing')) return;
+      const iv = INTERVALS[+btn.dataset.i], mode = btn.dataset.m;
+      btn.classList.add('playing'); btn.textContent = '…';
+      await scheduleInterval(iv.st, mode);
+      btn.classList.remove('playing'); btn.textContent = labels[mode];
+    });
+  });
+}
+
+// ── Juego 60 Segundos ─────────────────────────────────────────────────────────
+const G60 = { score:0, total:0, streak:0, best:0, timeLeft:60, tid:null, current:null, answered:false };
+const CIRC60 = 2 * Math.PI * 26;
+
+function startGame60() {
+  hideHeader();
+  if (G60.tid) clearInterval(G60.tid);
+  G60.score=0; G60.total=0; G60.streak=0; G60.best=0; G60.timeLeft=60; G60.answered=false;
+  document.getElementById('root').innerHTML = `
+    <div class="game60">
+      <div class="g60-top">
+        <div class="timer-ring">
+          <svg width="64" height="64" viewBox="0 0 64 64">
+            <circle cx="32" cy="32" r="26" fill="none" stroke="#e5e7eb" stroke-width="5"/>
+            <circle id="g60-ring" cx="32" cy="32" r="26" fill="none" stroke="#10b981" stroke-width="5"
+              stroke-linecap="round" stroke-dasharray="${CIRC60}" stroke-dashoffset="0"
+              transform="rotate(-90 32 32)" style="transition:stroke-dashoffset .9s linear,stroke .3s"/>
+          </svg>
+          <div class="timer-num" id="g60-num">60</div>
+        </div>
+        <div class="g60-scores">
+          <div class="g60-stat"><div class="val" id="g60-sc">0</div><div class="lbl">Correctas</div></div>
+          <div class="g60-stat"><div class="val" id="g60-rch">0</div><div class="lbl">Racha</div></div>
+          <div class="g60-stat"><div class="val" id="g60-pct">—</div><div class="lbl">Precisión</div></div>
+        </div>
+      </div>
+      <div class="g60-q-card">
+        <div class="g60-q-label">¿Qué intervalo es este?</div>
+        <div id="g60-staff"></div>
+      </div>
+      <div class="g60-fb" id="g60-fb"></div>
+      <div class="answer-grid" id="g60-grid"></div>
+      <button class="btn-secondary" id="g60-quit" style="max-width:200px">✕ Salir</button>
+    </div>`;
+  document.getElementById('g60-quit').addEventListener('click', () => { clearInterval(G60.tid); G60.tid=null; showModeSelect(); });
+  nextGame60Q();
+  G60.tid = setInterval(game60Tick, 1000);
+}
+
+function game60Tick() {
+  G60.timeLeft--;
+  const numEl=document.getElementById('g60-num'), ring=document.getElementById('g60-ring');
+  if (numEl) { numEl.textContent=G60.timeLeft; numEl.className='timer-num'+(G60.timeLeft<=10?' urgent':''); }
+  if (ring)  { ring.style.strokeDashoffset=CIRC60*(1-G60.timeLeft/60); ring.style.stroke=G60.timeLeft<=10?'#ef4444':'#10b981'; }
+  if (G60.timeLeft<=0) { clearInterval(G60.tid); G60.tid=null; showGame60Summary(); }
+}
+
+function updateG60Stats() {
+  const e=id=>document.getElementById(id);
+  if(e('g60-sc'))  e('g60-sc').textContent  = G60.score;
+  if(e('g60-rch')) e('g60-rch').textContent = G60.streak;
+  if(e('g60-pct')) e('g60-pct').textContent = G60.total>0?Math.round(G60.score/G60.total*100)+'%':'—';
+}
+
+function nextGame60Q() {
+  if (G60.timeLeft<=0) return;
+  G60.answered=false;
+  const iv=pick(INTERVALS), choices=buildChoices(iv, INTERVALS);
+  G60.current={iv,choices};
+  const staffEl=document.getElementById('g60-staff');
+  if (staffEl) staffEl.innerHTML=buildStaffSVG(iv.st,false,null);
+  const grid=document.getElementById('g60-grid');
+  if (grid) {
+    grid.innerHTML=choices.map(c=>`<button class="btn-ans" data-name="${c.name}">${c.name}</button>`).join('');
+    grid.querySelectorAll('.btn-ans').forEach(b=>b.addEventListener('click',()=>handleGame60Answer(b.dataset.name),{once:true}));
+  }
+  const fb=document.getElementById('g60-fb'); if (fb) { fb.className='g60-fb'; fb.textContent=''; }
+  scheduleInterval(iv.st,'ascending');
+}
+
+function handleGame60Answer(chosen) {
+  if (G60.answered||G60.timeLeft<=0) return;
+  G60.answered=true;
+  const correct=G60.current.iv.name, ok=chosen===correct;
+  G60.total++;
+  if (ok) { G60.score++; G60.streak++; if(G60.streak>G60.best) G60.best=G60.streak; } else G60.streak=0;
+  updateG60Stats();
+  document.querySelectorAll('#g60-grid .btn-ans').forEach(btn=>{
+    btn.disabled=true;
+    if(btn.dataset.name===chosen&&!ok) btn.classList.add('wrong');
+    if(btn.dataset.name===correct) btn.classList.add(ok?'correct':'reveal');
+  });
+  const fb=document.getElementById('g60-fb');
+  if(fb){fb.className='g60-fb '+(ok?'ok':'err');fb.textContent=ok?`✓ ¡${correct}!`:`✗ Era: ${correct}`;}
+  saveAttempt(correct,chosen,ok,null);
+  setTimeout(()=>{if(G60.timeLeft>0)nextGame60Q();},800);
+}
+
+function showGame60Summary() {
+  hideHeader();
+  const pct=G60.total>0?Math.round(G60.score/G60.total*100):0;
+  const emoji=pct>=80?'🏆':pct>=50?'⭐':'😊';
+  const msg=pct>=80?'¡Excelente oído!':pct>=50?'¡Buen trabajo!':'¡Sigue practicando!';
+  document.getElementById('root').innerHTML=`
+    <div class="g60-sum">
+      <div class="end-ico">${emoji}</div>
+      <div class="end-title">${msg}</div>
+      <div class="stat-row">
+        <div class="stat-box"><div class="stat-v">${G60.score}</div><div class="stat-l">Correctas</div></div>
+        <div class="stat-box"><div class="stat-v">${G60.total}</div><div class="stat-l">Total</div></div>
+        <div class="stat-box"><div class="stat-v">${pct}%</div><div class="stat-l">Precisión</div></div>
+        <div class="stat-box"><div class="stat-v">${G60.best}</div><div class="stat-l">Mejor racha</div></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" id="g60-again">▶ Jugar de nuevo</button>
+        <button class="btn-secondary" id="g60-menu">← Menú</button>
+      </div>
+    </div>`;
+  document.getElementById('g60-again').addEventListener('click',startGame60);
+  document.getElementById('g60-menu').addEventListener('click',showModeSelect);
+}
+
+// ── Selección de nivel ────────────────────────────────────────────────────────
+function showLevelSelect(mode) {
+  hideHeader();
+  document.getElementById('root').innerHTML = `
+    <div class="sel-screen">
+      <div class="brand-hd">
+        <div class="brand-row">
+          <span style="font-size:1.25rem">${mode === 'oido' ? '🎧' : '🎼'}</span>
+          <span class="brand-txt">Sonitus Intervalos</span>
+        </div>
+        <h1 class="page-h1">Elige el nivel</h1>
+        <p class="page-sub">Selecciona con cuántos intervalos quieres practicar</p>
+      </div>
+      <div class="level-grid">
+        ${Object.entries(LEVELS).map(([key, lv]) => {
+          const ivs = INTERVALS.filter(i => lv.sts.includes(i.st));
+          return `
+          <div class="level-card" data-level="${key}">
+            <div class="lc-ico">${lv.emoji}</div>
+            <div class="lc-info">
+              <div class="lc-name">${lv.label}</div>
+              <div class="lc-desc">${lv.desc}</div>
+              <div class="lc-tags">${ivs.map(i => `<span class="iv-tag">${i.name}</span>`).join('')}</div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+      <button class="btn-back-sm" id="btn-back">← Volver</button>
+    </div>`;
+  document.querySelectorAll('.level-card').forEach(el =>
+    el.addEventListener('click', () => startGame(mode, el.dataset.level)));
+  document.getElementById('btn-back').addEventListener('click', showModeSelect);
+}
+
+// ── Iniciar partida ───────────────────────────────────────────────────────────
+function startGame(mode, level) {
+  S.mode  = mode;
+  S.level = level;
+  S.pool  = INTERVALS.filter(i => LEVELS[level].sts.includes(i.st));
+  S.lives = S.maxLives = 3;
+  S.score = 0; S.streak = 0; S.maxStreak = 0;
+  S.qNum  = 0; S.roundCorrect = 0; S.roundXP = 0;
+  showHeader();
+  if (mode === 'oido') getCtx();
+  nextQuestion();
+}
+
+// ── Siguiente pregunta ────────────────────────────────────────────────────────
+async function nextQuestion() {
+  if (S.qNum >= S.qTotal) { showRoundEnd(); return; }
+  S.answered = false; S.playing = false;
+  S.qNum++;
+  updateHeader();
+
+  const interval = pick(S.pool);
+  const choices  = buildChoices(interval, S.pool);
+  const pm       = S.mode === 'oido' ? pick(PLAY_MODES) : null;
+  S.current      = { interval, pm, choices, startMs: null };
+
+  if (S.mode === 'oido') {
+    renderAudioQ(interval, pm, choices);
+    await playWithAnim(interval.st, pm);
+    S.current.startMs = Date.now();
+    S.playing = false;
+    enableAnswers();
+  } else {
+    renderNotationQ(interval, choices);
+  }
+}
+
+// ── Render: modo oído ─────────────────────────────────────────────────────────
+function renderAudioQ(interval, pm, choices) {
+  const isH = pm === 'harmonic';
+  document.getElementById('root').innerHTML = `
+    <main>
+      <div class="q-card">
+        <div class="mode-badge">🎧 ${MODE_LABEL[pm]}</div>
+        <div class="audio-visual">
+          <div class="note-dot playing" id="note-a">♩</div>
+          ${isH ? '<span style="font-size:1.75rem;color:var(--gb)">+</span>' : '<span class="arrow" id="arrow">→</span>'}
+          <div class="note-dot ${isH ? 'playing' : ''}" id="note-b">♩</div>
+        </div>
+        <button class="btn-play" id="btn-replay" disabled>
+          <span class="spinner-sm"></span> Reproduciendo…
+        </button>
+        <p class="hint-txt" id="hint-txt">Escucha con atención…</p>
+      </div>
+      <p class="q-label">¿Qué intervalo escuchaste?</p>
+      <div class="answer-grid" id="answer-grid">
+        ${choices.map(c => `<button class="btn-ans" data-name="${c.name}" disabled>${c.name}</button>`).join('')}
+      </div>
+      <div class="feedback" id="feedback"></div>
+    </main>`;
+}
+
+// ── Render: modo escritura ────────────────────────────────────────────────────
+function renderNotationQ(interval, choices) {
+  document.getElementById('root').innerHTML = `
+    <main>
+      <div class="q-card">
+        <div class="mode-badge">🎼 Identifica el intervalo</div>
+        <div class="staff-wrap" id="staff-wrap">${buildStaffSVG(interval.st, false, null)}</div>
+      </div>
+      <p class="q-label">¿Qué intervalo forman estas dos notas?</p>
+      <div class="answer-grid" id="answer-grid">
+        ${choices.map(c => `<button class="btn-ans" data-name="${c.name}">${c.name}</button>`).join('')}
+      </div>
+      <div class="feedback" id="feedback"></div>
+    </main>`;
+  document.querySelectorAll('.btn-ans').forEach(b =>
+    b.addEventListener('click', () => handleAnswer(b.dataset.name), { once: true }));
+  S.current.startMs = Date.now();
+}
+
+// ── Animación de audio ────────────────────────────────────────────────────────
+async function playWithAnim(st, pm) {
+  const na = () => document.getElementById('note-a');
+  const nb = () => document.getElementById('note-b');
+  const ar = () => document.getElementById('arrow');
+  const isH = pm === 'harmonic', isD = pm === 'descending';
+  const done = scheduleInterval(st, pm);
+  if (isH) {
+    await done;
+    na()?.classList.remove('playing');
+    nb()?.classList.remove('playing');
+  } else {
+    const first = isD ? nb : na, second = isD ? na : nb;
+    first()?.classList.add('playing'); second()?.classList.remove('playing');
+    await new Promise(r => setTimeout(r, 1100));
+    first()?.classList.remove('playing'); second()?.classList.add('playing');
+    ar()?.classList.add('lit');
+    await new Promise(r => setTimeout(r, 1100));
+    second()?.classList.remove('playing'); ar()?.classList.remove('lit');
+    await done;
+  }
+}
+
+function enableAnswers() {
+  document.querySelectorAll('.btn-ans').forEach(b => {
+    b.disabled = false;
+    b.addEventListener('click', () => handleAnswer(b.dataset.name), { once: true });
+  });
+  const rp = document.getElementById('btn-replay');
+  if (rp) { rp.disabled = false; rp.innerHTML = '🔊 Reproducir de nuevo'; rp.onclick = replayAudio; }
+  const ht = document.getElementById('hint-txt');
+  if (ht) ht.textContent = 'Puedes escuchar las veces que quieras antes de responder';
+}
+
+async function replayAudio() {
+  if (S.playing || S.answered) return;
+  S.playing = true;
+  const rp = document.getElementById('btn-replay');
+  if (rp) { rp.disabled = true; rp.innerHTML = '<span class="spinner-sm"></span> Reproduciendo…'; }
+  document.querySelectorAll('.btn-ans').forEach(b => b.disabled = true);
+  await playWithAnim(S.current.interval.st, S.current.pm);
+  S.playing = false;
+  enableAnswers();
+}
+
+// ── Respuesta ─────────────────────────────────────────────────────────────────
+async function handleAnswer(chosen) {
+  if (S.answered || S.playing) return;
+  S.answered = true;
+
+  const ms      = S.current.startMs ? Date.now() - S.current.startMs : null;
+  const correct = S.current.interval.name;
+  const st      = S.current.interval.st;
+  const ok      = chosen === correct;
+  let xp        = 0;
+
+  if (ok) {
+    S.streak++;
+    S.roundCorrect++;
+    if (S.streak > S.maxStreak) S.maxStreak = S.streak;
+    xp = 10;
+    if (S.streak >= 3) xp += 5;
+    if (ms && ms < 5000) xp += 5;
+    S.score  += xp;
+    S.roundXP += xp;
+  } else {
+    S.streak = 0;
+    S.lives--;
+  }
+  updateHeader();
+
+  document.querySelectorAll('.btn-ans').forEach(btn => {
+    btn.disabled = true;
+    if (btn.dataset.name === chosen && !ok) btn.classList.add('wrong');
+    if (btn.dataset.name === correct) btn.classList.add(ok ? 'correct' : 'reveal');
+  });
+  const rp = document.getElementById('btn-replay');
+  if (rp) rp.disabled = true;
+
+  if (S.mode === 'escritura') {
+    const sw = document.getElementById('staff-wrap');
+    if (sw) sw.innerHTML = buildStaffSVG(st, true, ok);
+    getCtx();
+    scheduleInterval(st, 'ascending');
+  }
+
+  const fb = document.getElementById('feedback');
+  fb.className = `feedback show ${ok ? 'ok' : 'err'}`;
+  if (ok) {
+    const msgs = ['¡Excelente!', '¡Correcto!', '¡Muy bien!', '¡Perfecto!'];
+    fb.innerHTML = `${pick(msgs)} <strong>${correct}</strong> — ${st} semitono${st !== 1 ? 's' : ''}`
+      + ` <span class="xp-pill">+${xp} XP</span>${S.streak >= 3 ? ' 🧠' : ''}`;
+  } else {
+    fb.innerHTML = `Era: <strong>${correct}</strong> — ${st} semitono${st !== 1 ? 's' : ''} &nbsp;⭐ −1`;
+  }
+
+  saveAttempt(correct, chosen, ok, ms);
+
+  if (S.lives <= 0) {
+    setTimeout(showGameOver, 1900);
+  } else {
+    setTimeout(nextQuestion, 1800);
+  }
+}
+
+// ── Game Over ─────────────────────────────────────────────────────────────────
+function showGameOver() {
+  hideHeader();
+  document.getElementById('root').innerHTML = `
+    <div class="end-screen">
+      <div class="end-ico">💔</div>
+      <div class="end-title">¡Se acabaron las vidas!</div>
+      <div class="end-sub">Llegaste a la pregunta ${S.qNum} de ${S.qTotal}</div>
+      <div class="stat-row">
+        <div class="stat-box"><div class="stat-v">${S.roundCorrect}</div><div class="stat-l">Correctas</div></div>
+        <div class="stat-box"><div class="stat-v">${S.score}</div><div class="stat-l">XP ganados</div></div>
+        <div class="stat-box"><div class="stat-v">${S.maxStreak}</div><div class="stat-l">Racha máx.</div></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" id="btn-retry">Intentar de nuevo</button>
+        <button class="btn-secondary" id="btn-menu-go">Menú principal</button>
+      </div>
+    </div>`;
+  document.getElementById('btn-retry').addEventListener('click', () => startGame(S.mode, S.level));
+  document.getElementById('btn-menu-go').addEventListener('click', showModeSelect);
+}
+
+// ── Fin de ronda ──────────────────────────────────────────────────────────────
+function showRoundEnd() {
+  hideHeader();
+  const pct  = Math.round((S.roundCorrect / S.qTotal) * 100);
+  const ico  = pct >= 90 ? '🏆' : pct >= 70 ? '⭐' : pct >= 50 ? '👍' : '😊';
+  const msg  = pct >= 80 ? '¡Excelente ronda!' : pct >= 60 ? '¡Buen trabajo!' : '¡Sigue practicando!';
+  const nextL = { easy: 'medium', medium: 'hard' };
+  const canUp = pct >= 80 && S.level !== 'hard' && nextL[S.level];
+
+  document.getElementById('root').innerHTML = `
+    <div class="end-screen">
+      <div class="end-ico">${ico}</div>
+      <div class="end-title">${msg}</div>
+      <div class="stat-row">
+        <div class="stat-box"><div class="stat-v">${S.roundCorrect}/${S.qTotal}</div><div class="stat-l">Correctas</div></div>
+        <div class="stat-box"><div class="stat-v">${S.roundXP}</div><div class="stat-l">XP ganados</div></div>
+        <div class="stat-box"><div class="stat-v">${S.maxStreak}</div><div class="stat-l">Racha máx.</div></div>
+      </div>
+      <div class="rnd-bar"><div class="rnd-fill" id="rnd-fill" style="width:0%"></div></div>
+      <div style="font-size:.875rem;color:var(--g500)">${pct}% de precisión</div>
+      ${canUp ? `<div class="upgrade-box">🎯 ¡Estás listo para subir! Prueba el nivel <strong>${LEVELS[nextL[S.level]].label}</strong>.</div>` : ''}
+      <div class="btn-row">
+        <button class="btn-primary" id="btn-again">Jugar de nuevo</button>
+        ${canUp ? `<button class="btn-secondary" id="btn-up">Subir a ${LEVELS[nextL[S.level]].label} →</button>` : ''}
+        <button class="btn-secondary" id="btn-menu">Menú principal</button>
+      </div>
+    </div>`;
+
+  setTimeout(() => {
+    const f = document.getElementById('rnd-fill');
+    if (f) f.style.width = pct + '%';
+  }, 80);
+
+  document.getElementById('btn-again').addEventListener('click', () => startGame(S.mode, S.level));
+  document.getElementById('btn-menu').addEventListener('click', showModeSelect);
+  if (canUp) {
+    document.getElementById('btn-up')?.addEventListener('click', () => startGame(S.mode, nextL[S.level]));
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+showModeSelect();
+</script>
+
+<style>
+  #wm { position: fixed; inset: 0; pointer-events: none; z-index: 9; overflow: hidden; }
+  #wm svg { position: absolute; color: #6b7280; opacity: .07; }
+</style>
+<div id="wm">
+  <!-- Headphones: top-left -->
+  <svg style="width:160px;top:-35px;left:-38px;transform:rotate(-12deg)" viewBox="0 0 160 130" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 80 Q20 20 80 18 Q140 18 138 80"/>
+    <rect x="8" y="76" width="30" height="42" rx="12"/><rect x="13" y="82" width="20" height="30" rx="8"/>
+    <rect x="122" y="76" width="30" height="42" rx="12"/><rect x="127" y="82" width="20" height="30" rx="8"/>
+  </svg>
+  <!-- Grand Piano: top-right -->
+  <svg style="width:165px;top:-42px;right:-42px;transform:rotate(15deg)" viewBox="0 0 210 145" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 118 L18 35 Q18 12 50 10 Q90 6 135 10 Q175 8 192 40 Q205 65 195 90 Q185 115 155 120 Z"/>
+    <rect x="18" y="96" width="95" height="22" rx="3"/>
+    <line x1="135" y1="10" x2="192" y2="40"/>
+    <line x1="32" y1="118" x2="26" y2="140"/><line x1="82" y1="120" x2="78" y2="140"/><line x1="148" y1="120" x2="152" y2="140"/>
+    <path d="M34 135 Q78 140 148 135"/>
+  </svg>
+  <!-- Headphones: bottom-right -->
+  <svg style="width:150px;bottom:-30px;right:-28px;transform:rotate(-10deg)" viewBox="0 0 160 130" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 80 Q20 20 80 18 Q140 18 138 80"/>
+    <rect x="8" y="76" width="30" height="42" rx="12"/><rect x="13" y="82" width="20" height="30" rx="8"/>
+    <rect x="122" y="76" width="30" height="42" rx="12"/><rect x="127" y="82" width="20" height="30" rx="8"/>
+  </svg>
+  <!-- Piano Keyboard: bottom-left -->
+  <svg style="width:168px;bottom:-12px;left:-38px;transform:rotate(8deg)" viewBox="0 0 210 75" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="4" y="4" width="202" height="67" rx="4"/>
+    <line x1="33" y1="4" x2="33" y2="71"/><line x1="62" y1="4" x2="62" y2="71"/>
+    <line x1="91" y1="4" x2="91" y2="71"/><line x1="120" y1="4" x2="120" y2="71"/>
+    <line x1="149" y1="4" x2="149" y2="71"/><line x1="178" y1="4" x2="178" y2="71"/>
+    <rect x="24" y="4" width="18" height="44" rx="2"/><rect x="53" y="4" width="18" height="44" rx="2"/>
+    <rect x="111" y="4" width="18" height="44" rx="2"/><rect x="140" y="4" width="18" height="44" rx="2"/>
+    <rect x="169" y="4" width="18" height="44" rx="2"/>
+  </svg>
+</div>
+</body>
+</html>

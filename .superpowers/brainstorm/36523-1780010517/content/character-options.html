@@ -1,0 +1,144 @@
+<h2>¿Cómo es el Maestro Musical?</h2>
+<p class="subtitle">El personaje animado que aparece en el chat. Elige el estilo visual.</p>
+
+<div class="cards">
+
+  <!-- Opción A: Nota musical animada -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f5f3ff;padding:24px;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px 8px 0 0;">
+      <style>
+        @keyframes bob { 0%,100%{transform:translateY(0) rotate(-3deg)} 50%{transform:translateY(-8px) rotate(3deg)} }
+        @keyframes blink { 0%,90%,100%{transform:scaleY(1)} 95%{transform:scaleY(0.1)} }
+        .char-a { animation: bob 2s ease-in-out infinite; display:inline-block; }
+      </style>
+      <div class="char-a">
+        <svg width="80" height="100" viewBox="0 0 80 100">
+          <!-- Cuerpo nota musical (logo de Sonitus) -->
+          <line x1="52" y1="8" x2="52" y2="72" stroke="#7c3aed" stroke-width="5" stroke-linecap="round"/>
+          <ellipse cx="38" cy="75" rx="14" ry="10" fill="#7c3aed" transform="rotate(-15 38 75)"/>
+          <!-- Ojos simpáticos -->
+          <circle cx="34" cy="68" r="4" fill="white" style="animation:blink 3s infinite"/>
+          <circle cx="35" cy="69" r="2" fill="#3b0764"/>
+          <circle cx="43" cy="66" r="4" fill="white" style="animation:blink 3s infinite 0.1s"/>
+          <circle cx="44" cy="67" r="2" fill="#3b0764"/>
+          <!-- Sonrisa -->
+          <path d="M33,76 Q38,82 44,76" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <!-- Corchete -->
+          <path d="M52,8 C65,4 72,16 66,26" fill="none" stroke="#7c3aed" stroke-width="4" stroke-linecap="round"/>
+          <!-- Manos pequeñas -->
+          <circle cx="24" cy="60" r="5" fill="#7c3aed"/>
+          <circle cx="52" cy="55" r="5" fill="#7c3aed"/>
+        </svg>
+      </div>
+      <div style="font-size:11px;color:#6d28d9;font-weight:600;margin-top:8px;">Nota Musical</div>
+    </div>
+    <div class="card-body">
+      <h3>A — Nota Musical Viva</h3>
+      <p>El logo de Sonitus cobra vida. Ojos, sonrisa y animación de rebote. Consistente con la marca del portal.</p>
+    </div>
+  </div>
+
+  <!-- Opción B: Búho maestro -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#ecfdf5;padding:24px;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px 8px 0 0;">
+      <style>
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+        @keyframes tilt { 0%,100%{transform:rotate(0deg)} 25%{transform:rotate(-8deg)} 75%{transform:rotate(8deg)} }
+        .char-b { animation: float 2.5s ease-in-out infinite; display:inline-block; }
+        .char-b-head { animation: tilt 4s ease-in-out infinite; transform-origin: center bottom; display:inline-block; }
+      </style>
+      <div class="char-b">
+        <svg width="80" height="100" viewBox="0 0 80 100">
+          <!-- Cuerpo -->
+          <ellipse cx="40" cy="72" rx="22" ry="26" fill="#059669"/>
+          <!-- Alas -->
+          <ellipse cx="16" cy="70" rx="10" ry="16" fill="#047857" transform="rotate(-20 16 70)"/>
+          <ellipse cx="64" cy="70" rx="10" ry="16" fill="#047857" transform="rotate(20 64 70)"/>
+          <!-- Cabeza -->
+          <circle cx="40" cy="40" r="22" fill="#059669"/>
+          <!-- Orejas (plumas) -->
+          <polygon points="24,22 18,8 30,18" fill="#047857"/>
+          <polygon points="56,22 62,8 50,18" fill="#047857"/>
+          <!-- Cara -->
+          <circle cx="32" cy="38" r="9" fill="white"/>
+          <circle cx="48" cy="38" r="9" fill="white"/>
+          <circle cx="33" cy="39" r="5" fill="#1e3a1e"/>
+          <circle cx="49" cy="39" r="5" fill="#1e3a1e"/>
+          <circle cx="34" cy="37" r="2" fill="white"/>
+          <circle cx="50" cy="37" r="2" fill="white"/>
+          <!-- Pico -->
+          <polygon points="40,46 35,52 45,52" fill="#f59e0b"/>
+          <!-- Birrete académico -->
+          <rect x="22" y="18" width="36" height="6" rx="2" fill="#1e3a1e"/>
+          <rect x="36" y="12" width="8" height="8" rx="1" fill="#1e3a1e"/>
+          <line x1="44" y1="16" x2="52" y2="22" stroke="#f59e0b" stroke-width="2"/>
+          <circle cx="52" cy="23" r="3" fill="#f59e0b"/>
+          <!-- Patas -->
+          <line x1="32" y1="96" x2="28" y2="100" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+          <line x1="48" y1="96" x2="52" y2="100" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div style="font-size:11px;color:#065f46;font-weight:600;margin-top:8px;">Prof. Búho</div>
+    </div>
+    <div class="card-body">
+      <h3>B — Prof. Búho con Birrete</h3>
+      <p>Búho con gorro académico — símbolo universal de sabiduría. Verde Sonitus, expresivo y académico.</p>
+    </div>
+  </div>
+
+  <!-- Opción C: Músico humano cartoon -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#fffbeb;padding:24px;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px 8px 0 0;">
+      <style>
+        @keyframes wave { 0%,100%{transform:rotate(0deg)} 30%{transform:rotate(20deg)} 60%{transform:rotate(-10deg)} }
+        .char-c { display:inline-block; }
+        .arm-c { animation: wave 2s ease-in-out infinite; transform-origin: 60px 56px; display:inline-block; }
+      </style>
+      <div class="char-c">
+        <svg width="80" height="110" viewBox="0 0 80 110">
+          <!-- Cuerpo -->
+          <rect x="24" y="58" width="32" height="36" rx="8" fill="#f59e0b"/>
+          <!-- Cuello -->
+          <rect x="34" y="50" width="12" height="12" fill="#fde68a"/>
+          <!-- Cabeza -->
+          <circle cx="40" cy="36" r="22" fill="#fde68a"/>
+          <!-- Pelo -->
+          <path d="M18,30 Q20,12 40,12 Q60,12 62,30" fill="#78350f"/>
+          <ellipse cx="19" cy="34" rx="6" ry="10" fill="#78350f" transform="rotate(-15 19 34)"/>
+          <ellipse cx="61" cy="34" rx="6" ry="10" fill="#78350f" transform="rotate(15 61 34)"/>
+          <!-- Cara -->
+          <circle cx="32" cy="35" r="4" fill="white"/>
+          <circle cx="48" cy="35" r="4" fill="white"/>
+          <circle cx="33" cy="36" r="2.5" fill="#1c1917"/>
+          <circle cx="49" cy="36" r="2.5" fill="#1c1917"/>
+          <circle cx="33.5" cy="34.5" r="1" fill="white"/>
+          <path d="M33,45 Q40,51 47,45" fill="none" stroke="#b45309" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Mejillas -->
+          <circle cx="26" cy="42" r="5" fill="#fca5a5" opacity="0.6"/>
+          <circle cx="54" cy="42" r="5" fill="#fca5a5" opacity="0.6"/>
+          <!-- Brazo que saluda -->
+          <g class="arm-c">
+            <path d="M56,64 Q72,52 68,44" fill="none" stroke="#f59e0b" stroke-width="10" stroke-linecap="round"/>
+            <!-- Mano -->
+            <circle cx="68" cy="43" r="8" fill="#fde68a"/>
+          </g>
+          <!-- Brazo izq -->
+          <path d="M24,64 Q10,72 12,80" fill="none" stroke="#f59e0b" stroke-width="10" stroke-linecap="round"/>
+          <!-- Corchea en mano -->
+          <text x="62" y="42" font-size="12" fill="#1c1917">♪</text>
+          <!-- Patas -->
+          <rect x="26" y="92" width="10" height="14" rx="4" fill="#92400e"/>
+          <rect x="44" y="92" width="10" height="14" rx="4" fill="#92400e"/>
+        </svg>
+      </div>
+      <div style="font-size:11px;color:#92400e;font-weight:600;margin-top:8px;">Maestro Tomas</div>
+    </div>
+    <div class="card-body">
+      <h3>C — Maestro Cartoon</h3>
+      <p>Figura humana amigable que saluda. Se puede personalizar con el nombre "Maestro Tomas". Cálido y cercano.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px;font-size:12px;">💡 Recomendación: <strong>A — Nota Musical</strong>. Usa el logo de Sonitus y refuerza la identidad del portal. Consistente, único y reconocible.</p>

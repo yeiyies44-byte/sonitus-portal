@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Background circle -->
+  <rect width="512" height="512" rx="100" ry="100" fill="#059669"/>
+  <!-- Musical note -->
+  <g fill="#ffffff">
+    <!-- Note head -->
+    <ellipse cx="208" cy="368" rx="54" ry="38" transform="rotate(-15 208 368)"/>
+    <!-- Note stem -->
+    <rect x="252" y="164" width="22" height="220" rx="11"/>
+    <!-- Note flag / beam -->
+    <path d="M274 164 Q374 198 366 272 Q310 242 274 262 Z"/>
+    <path d="M274 218 Q370 252 362 324 Q308 296 274 314 Z"/>
+  </g>
+</svg>
