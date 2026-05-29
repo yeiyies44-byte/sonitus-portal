@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const SECRET = process.env.JWT_SECRET || 'sonitus_jwt_2024_clave_privada';
+const SECRET = process.env.JWT_SECRET || 'sonitus_dev_secret_local';
 
 function requireAuth(req, res, next) {
   const token = req.cookies?.stoken;

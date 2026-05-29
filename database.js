@@ -195,11 +195,12 @@ function initDb() {
 
   const hasTeacher = db.prepare("SELECT id FROM users WHERE role='teacher'").get();
   if (!hasTeacher) {
-    const hash = bcrypt.hashSync('Sonitus2024!', 10);
+    const pwd = process.env.TEACHER_PASSWORD || 'Sonitus2024!';
+    const hash = bcrypt.hashSync(pwd, 10);
     db.prepare('INSERT INTO users (username,full_name,password_hash,role) VALUES (?,?,?,?)').run(
       'profesor', 'Profesor Sonitus', hash, 'teacher'
     );
-    console.log('✓ Cuenta de profesor creada  (usuario: "profesor", contraseña: "Sonitus2024!")');
+    console.log(`✓ Cuenta de profesor creada  (usuario: "profesor", contraseña: "${pwd}")`);
   }
 }
 
