@@ -303,13 +303,6 @@ async function renderAdmin(teacherData) {
       return;
     }
 
-    const existing = await getDocs(query(collection(db, 'users'), where('username', '==', username)));
-    if (!existing.empty) {
-      errEl.textContent = 'Ese usuario ya existe.';
-      errEl.style.display = 'block';
-      return;
-    }
-
     try {
       const cred = await createUserWithEmailAndPassword(auth, `${username}@sonitus.portal`, password);
       await setDoc(doc(db, 'users', cred.user.uid), {

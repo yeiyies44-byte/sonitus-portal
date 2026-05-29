@@ -282,10 +282,6 @@ function showRegister(msg = '') {
     if (password.length < 6) return showRegister('La contraseña debe tener mínimo 6 caracteres.');
     if (username === 'profesor') return showRegister('Ese nombre de usuario está reservado.');
 
-    const usernameQuery = query(collection(db, 'users'), where('username', '==', username));
-    const existing = await getDocs(usernameQuery);
-    if (!existing.empty) return showRegister('Ese nombre de usuario ya está en uso.');
-
     try {
       const cred = await createUserWithEmailAndPassword(auth, `${username}@sonitus.portal`, password);
       await setDoc(userRef(cred.user.uid), {
